@@ -1,0 +1,12 @@
+agda-ffi/dist
+*.agdai
+MAlonzo
+*.prof
+*.treeless
+*.hi
+*.o
+*.agda#
+.#*.agda
+*~
+lib
+dist-newstyle

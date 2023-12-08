@@ -1,0 +1,35 @@
+cabal-version:      3.0
+name:               scope
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            Unlicense
+license-file:       LICENSE
+author:             Jesper Cockx, Lucas Escot
+maintainer:         jesper@sikanda.be, lucas@escot.me
+-- copyright:
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+common warnings
+    ghc-options:
+      -Wall
+      -fno-warn-incomplete-patterns
+      -fno-warn-unused-matches
+
+library
+    import:           warnings
+    exposed-modules:  Scope
+                    , Scope.All
+                    , Scope.Core
+                    , Scope.Diff
+                    , Scope.In
+                    , Scope.Split
+                    , Scope.Sub
+
+    -- other-modules:
+    -- other-extensions:
+    build-depends:    base ^>=4.17.0.0
+    hs-source-dirs:   lib
+    default-language: GHC2021
