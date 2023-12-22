@@ -12,7 +12,7 @@ open import Scope.Sub
 open import Scope.Split
 
 private variable
-  name    : Set
+  @0 name : Set
   @0 α β  : Scope name
   @0 x    : name
   p q     : @0 name → Set

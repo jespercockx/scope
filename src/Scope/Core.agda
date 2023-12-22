@@ -13,7 +13,7 @@ open import Utils.Tactics
 import Utils.List as List
 
 private variable
-  name : Set
+  @0 name : Set
 
 opaque
   Scope : (@0 name : Set) → Set

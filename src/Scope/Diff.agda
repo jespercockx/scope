@@ -9,7 +9,7 @@ open import Scope.Sub
 open import Scope.In
 
 private variable
-  name : Set
+  @0 name : Set
   @0 x y : name
   @0 α α₁ α₂ β β₁ β₂ γ : Scope name
 

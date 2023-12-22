@@ -10,7 +10,7 @@ open import Haskell.Law.Equality
 open import Scope.Core
 
 private variable
-  name : Set
+  @0 name : Set
   @0 x : name
   @0 α α₁ α₂ β β₁ β₂ γ δ ε : Scope name
 
