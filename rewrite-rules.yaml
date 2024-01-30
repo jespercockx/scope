@@ -1,0 +1,5 @@
+rewrites:
+
+  - from: "Haskell.Prim.Tuple.second"
+    to: "second"
+    importing: "Data.Bifunctor"
