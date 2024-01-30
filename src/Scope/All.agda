@@ -51,6 +51,17 @@ opaque
   lookupAll (List.ACons _ ps) < ConsR x q > = lookupAll ps < q >
   {-# COMPILE AGDA2HS lookupAll #-}
 
+  findAll : {q : Set}
+          → All p α
+          → ({@0 el : name} → (pel : p el) → (ela : el ∈ α) → Maybe q)
+          → Maybe q
+  findAll List.ANil qc = Nothing
+  findAll (List.ACons px al) qc =
+    case qc px (inHere) of λ where
+      (Just qt) → Just qt
+      Nothing → findAll al (λ pel i → qc pel (inThere i))
+  {-# COMPILE AGDA2HS findAll #-}
+
 _!_ : {p : @0 name → Set} {@0 α : Scope name}
     → All p α → (@0 x : name) → {@(tactic auto) ok : x ∈ α} → p x
 (ps ! _) {s} = lookupAll ps s
@@ -72,6 +83,5 @@ opaque
 
   allIn : {@0 l : Scope name} → All p l → All (λ el → (p el) × (el ∈ l)) l
   allIn List.ANil = List.ANil
-  allIn (List.ACons x al) = List.ACons (x , inHere) $ mapAll (second inThere) (allIn al)
-
+  allIn (List.ACons x al) = List.ACons (x , inHere) (mapAll (second inThere) (allIn al))
   {-# COMPILE AGDA2HS allIn #-}
