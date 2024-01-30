@@ -2,6 +2,7 @@ module Scope.All where
 
 open import Haskell.Prelude hiding (All)
 open import Haskell.Extra.Erase
+open import Haskell.Prim.Tuple using (second)
 
 import Utils.List as List
 open import Utils.Tactics
@@ -68,3 +69,9 @@ opaque
   tabulateAll (rezz []) f = List.ANil
   tabulateAll (rezz (x ∷ α)) f = List.ACons (f inHere) (tabulateAll (rezz-id) (f ∘ inThere))
   {-# COMPILE AGDA2HS tabulateAll #-}
+
+  allIn : {@0 l : Scope name} → All p l → All (λ el → (p el) × (el ∈ l)) l
+  allIn List.ANil = List.ANil
+  allIn (List.ACons x al) = List.ACons (x , inHere) $ mapAll (second inThere) (allIn al)
+
+  {-# COMPILE AGDA2HS allIn #-}
