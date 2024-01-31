@@ -74,6 +74,14 @@ opaque
   subBindDrop {y = y} = subJoinDrop (rezz (singleton y))
   {-# COMPILE AGDA2HS subBindDrop #-}
 
+  subBindrKeep : Rezz _ β → α ⊆ β → (bindr α y) ⊆ (bindr β y)
+  subBindrKeep {y = y} r < p > = < splitBindrLeft r p >
+  {-# COMPILE AGDA2HS subBindKeep #-}
+
+  subBindrDrop : Rezz _ β → α ⊆ β → α ⊆ (bindr β y)
+  subBindrDrop {y = y} r < p > = < splitBindrRight r p >
+  {-# COMPILE AGDA2HS subBindDrop #-}
+
 opaque
   unfolding Sub
 

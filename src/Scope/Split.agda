@@ -5,9 +5,12 @@ open import Haskell.Prelude
 open import Haskell.Extra.Dec
 open import Haskell.Extra.Erase
 open import Haskell.Extra.Refinement
-open import Haskell.Law.Equality
+open import Haskell.Law.Equality hiding (subst)
+open import Haskell.Law.Monoid
 
 open import Scope.Core
+
+open import Utils.Misc
 
 private variable
   @0 name : Set
@@ -154,6 +157,16 @@ opaque
   splitJoin r (ConsR x p) q = ConsR x (splitJoin (rezzTail r) p q)
   {-# COMPILE AGDA2HS splitJoin #-}
 
+splitJoinLeftr : Rezz _ β → β₁ ⋈ β₂ ≡ β → (β₁ <> α) ⋈ β₂ ≡ (β <> α)
+splitJoinLeftr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p = 
+  subst (λ γ → (β₁ <> α) ⋈ γ ≡ (β <> α)) (rightIdentity _) (splitJoin r p splitEmptyRight)
+{-# COMPILE AGDA2HS splitJoinLeftr #-}
+
+splitJoinRightr : Rezz _ β → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (β₂ <> α) ≡ (β <> α)
+splitJoinRightr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p = 
+  subst (λ γ → γ ⋈ (β₂ <> α) ≡ (β <> α)) (rightIdentity _) (splitJoin r p splitEmptyLeft)
+{-# COMPILE AGDA2HS splitJoinLeftr #-}
+
 opaque
   unfolding Split
 
@@ -163,6 +176,14 @@ opaque
 
   splitBindRight : α ⋈ β ≡ γ → α ⋈ (bind x β) ≡ (bind x γ)
   splitBindRight {x = x} = splitJoinRight (rezz (singleton x))
+  {-# COMPILE AGDA2HS splitBindRight #-}
+
+  splitBindrLeft : Rezz _ γ → α ⋈ β ≡ γ → (bindr α x) ⋈ β ≡ (bindr γ x)
+  splitBindrLeft {x = x} r p = splitJoinLeftr r p
+  {-# COMPILE AGDA2HS splitBindLeft #-}
+
+  splitBindrRight : Rezz _ γ → α ⋈ β ≡ γ → α ⋈ (bindr β x) ≡ (bindr γ x)
+  splitBindrRight {x = x} = splitJoinRightr
   {-# COMPILE AGDA2HS splitBindRight #-}
 
 {-

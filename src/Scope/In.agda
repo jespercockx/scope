@@ -87,6 +87,13 @@ opaque
   {-# COMPILE AGDA2HS inBindCase #-}
 
 opaque
+  unfolding Scope Sub
+
+  inBindrCase : Rezz _ α → x ∈ (α ▹ y) → (x ∈ α → a) → (@0 x ≡ y → a) → a
+  inBindrCase r p f g = inJoinCase r p f (λ q → inSingCase q g)
+  {-# COMPILE AGDA2HS inBindrCase #-}
+
+opaque
   unfolding Split Sub
 
   decIn

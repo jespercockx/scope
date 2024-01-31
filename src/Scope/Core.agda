@@ -63,6 +63,12 @@ bind x α = singleton x <> α
 
 syntax bind x α = x ◃ α
 
+bindr : Scope name → name → Scope name
+bindr α x = α <> [ x ]
+{-# COMPILE AGDA2HS bindr #-}
+
+syntax bindr α x = α ▹ x
+
 opaque
   unfolding Scope
 
