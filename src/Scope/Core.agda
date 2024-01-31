@@ -30,9 +30,27 @@ opaque
     iSemigroupScope : Semigroup (Scope name)
     iSemigroupScope = iSemigroupList
 
-    iMonoidScope : Monoid (Scope name)
-    iMonoidScope = iMonoidList
+  private
+    -- we do this to get a transparent super instance in the monoid instance
+    scopeMempty : Scope name
+    scopeMempty = mempty
 
+    scopeMappend : Scope name → Scope name → Scope name
+    scopeMappend = mappend
+
+    scopeMConcat : List (Scope name) → Scope name
+    scopeMConcat = mconcat
+
+instance
+  iMonoidScope : Monoid (Scope name)
+  Monoid.super iMonoidScope = iSemigroupScope
+  Monoid.mempty iMonoidScope = scopeMempty
+  Monoid.mappend iMonoidScope = scopeMappend
+  Monoid.mconcat iMonoidScope = scopeMConcat
+
+opaque
+  unfolding Scope
+  instance
     iLawfulSemigroupScope : IsLawfulSemigroup (Scope name)
     iLawfulSemigroupScope = iLawfulSemigroupList
 
