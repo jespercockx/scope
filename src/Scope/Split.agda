@@ -165,7 +165,7 @@ splitJoinLeftr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
 splitJoinRightr : Rezz _ β → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (β₂ <> α) ≡ (β <> α)
 splitJoinRightr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p = 
   subst (λ γ → γ ⋈ (β₂ <> α) ≡ (β <> α)) (rightIdentity _) (splitJoin r p splitEmptyLeft)
-{-# COMPILE AGDA2HS splitJoinLeftr #-}
+{-# COMPILE AGDA2HS splitJoinRightr #-}
 
 opaque
   unfolding Split
@@ -180,11 +180,11 @@ opaque
 
   splitBindrLeft : Rezz _ γ → α ⋈ β ≡ γ → (bindr α x) ⋈ β ≡ (bindr γ x)
   splitBindrLeft {x = x} r p = splitJoinLeftr r p
-  {-# COMPILE AGDA2HS splitBindLeft #-}
+  {-# COMPILE AGDA2HS splitBindrLeft #-}
 
   splitBindrRight : Rezz _ γ → α ⋈ β ≡ γ → α ⋈ (bindr β x) ≡ (bindr γ x)
   splitBindrRight {x = x} = splitJoinRightr
-  {-# COMPILE AGDA2HS splitBindRight #-}
+  {-# COMPILE AGDA2HS splitBindrRight #-}
 
 {-
 The following statement is FALSE:
