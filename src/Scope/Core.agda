@@ -88,33 +88,63 @@ opaque
   rezzBind = rezzCong2 _∷_ rezzErase
   {-# COMPILE AGDA2HS rezzBind #-}
 
-  --TODO: fix proofs, take a look at @Jesper's lecture notes, there should be an elegant proof that goes through the naïve version of revScope
+  revScopeAccComp : (s p : Scope name) → revScopeAcc s p ≡ revScope s <> p
+  revScopeAccComp [] p = refl
+  revScopeAccComp (x ∷ s) p
+    rewrite (revScopeAccComp s (x ∷ p))
+    rewrite (revScopeAccComp s (x ∷ []))
+    = associativity ⦃ _ ⦄ ⦃ iLawfulSemigroupScope ⦄ (revScopeAcc s []) (x ∷ []) p
+
+  private
+    rev' : Scope name → Scope name
+    rev' [] = []
+    rev' (x ∷ s) = rev' s <> (x ∷ [])
+
+    revsrev' : (s : Scope name) → revScope s ≡ rev' s
+    revsrev' [] = refl
+    revsrev' (x ∷ s)
+      rewrite (revScopeAccComp s (x ∷ []))
+      = cong (λ t → t <> (x ∷ [])) (revsrev' s)
+
+    rev'md : (s p : Scope name) → rev' (s <> p) ≡ (rev' p) <> (rev' s)
+    rev'md [] p = sym (rightIdentity ⦃ _ ⦄ ⦃ iLawfulMonoidScope ⦄ (rev' p))
+    rev'md (x ∷ s) p = begin
+      rev' ((x ∷ s) <> p)
+      ≡⟨ cong (λ s → s <> (x ∷ [])) (rev'md s p) ⟩
+      (rev' p <> rev' s) <> (x ∷ [])
+      ≡⟨ sym (associativity ⦃ _ ⦄ ⦃ iLawfulSemigroupList ⦄ (rev' p) (rev' s) (x ∷ [])) ⟩
+      (rev' p) <> (rev' (x ∷ s))
+      ∎
+
+    rev'rev'id : (s : Scope name) → rev' (rev' s) ≡ s
+    rev'rev'id [] = refl
+    rev'rev'id (x ∷ s)
+      rewrite rev'md (rev' s) (x ∷ [])
+      rewrite rev'rev'id s
+      = refl
+
+    rev'bind : (s : Scope name) → (@0 x : name) → rev' (x ◃ s) ≡ (rev' s) ▹ x
+    rev'bind s x = refl
+
   revScopeMempty : revScope {name = name} mempty ≡ mempty
   revScopeMempty = refl
 
-  revScopeAccCom : (s p : Scope name) → revScopeAcc s p ≡ revScope s <> p
-  revScopeAccCom [] p = refl
-  revScopeAccCom (x ∷ s) p
-    rewrite (revScopeAccCom s (x ∷ p))
-    rewrite (revScopeAccCom s (x ∷ []))
-    = associativity (revScopeAcc s []) (x ∷ []) p
+  revsMappendDist : (s p : Scope name)
+                      → revScope (s <> p) ≡ (revScope p) <> (revScope s)
+  revsMappendDist s p
+    rewrite revsrev' s
+    rewrite revsrev' p
+    rewrite revsrev' (s <> p)
+    = rev'md s p
 
-  revMappendDist : (s p : Scope name) → revScope (s <> p) ≡ (revScope p) <> (revScope s)
-  revMappendDist [] p = sym (rightIdentity (revScope p))
-  revMappendDist (x ∷ s) p = {!revMappendDist s (x ∷ p)!}
+  revsRevsId : (s : Scope name) → revScope (revScope s) ≡ s
+  revsRevsId s
+    rewrite revsrev' s
+    rewrite revsrev' (rev' s)
+    = rev'rev'id s
 
-  revrevid : (s : Scope name) → revScope (revScope s) ≡ s
-  revrevid [] = refl
-  revrevid (x ∷ s) = begin
-    revScope (revScope (x ∷ s))
-    ≡⟨ cong revScope (revScopeAccCom s (x ∷ [])) ⟩
-    revScope (revScope s <> (x ∷ []))
-    ≡⟨ revScopeAccCom {!revScope s!} {!!} ⟩
-    {!!}
-    ≡⟨ {!!} ⟩
-    {!!}
-    ∎
-
-  --revBind : (s : Scope name) → (@0 x : name) → revScope (x ◃ s) ≡ (revScope s) ▹ x
-  --revBind [] x = refl
-  --revBind (Erased y ∷ s) x = cong (λ p → p <> [ x ]) (revBind s y)
+  revsBind : (s : Scope name) → (@0 x : name) → revScope (x ◃ s) ≡ (revScope s) ▹ x
+  revsBind s x
+    rewrite revsrev' (x ◃ s)
+    rewrite revsrev' s
+    = rev'bind s x
