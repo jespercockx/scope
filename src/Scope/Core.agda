@@ -41,7 +41,7 @@ opaque
     iSemigroupScope = iSemigroupList
 
   private
-    -- we do this to get a transparent super instance in the monoid instance
+    -- we do this to get a transparent super field in the monoid instance
     scopeMempty : Scope name
     scopeMempty = mempty
 
@@ -80,7 +80,7 @@ bindr α x = α <> [ x ]
 syntax bindr α x = α ▹ x
 
 opaque
-  unfolding Scope
+  unfolding Scope iLawfulSemigroupScope iLawfulMonoidScope
 
   rezzBind
     : {@0 α : Scope name} {@0 x : name}
@@ -93,7 +93,7 @@ opaque
   revScopeAccComp (x ∷ s) p
     rewrite (revScopeAccComp s (x ∷ p))
     rewrite (revScopeAccComp s (x ∷ []))
-    = associativity ⦃ _ ⦄ ⦃ iLawfulSemigroupScope ⦄ (revScopeAcc s []) (x ∷ []) p
+    = associativity (revScopeAcc s []) (x ∷ []) p
 
   private
     rev' : Scope name → Scope name
@@ -107,12 +107,12 @@ opaque
       = cong (λ t → t <> (x ∷ [])) (revsrev' s)
 
     rev'md : (s p : Scope name) → rev' (s <> p) ≡ (rev' p) <> (rev' s)
-    rev'md [] p = sym (rightIdentity ⦃ _ ⦄ ⦃ iLawfulMonoidScope ⦄ (rev' p))
+    rev'md [] p = sym (rightIdentity (rev' p))
     rev'md (x ∷ s) p = begin
       rev' ((x ∷ s) <> p)
       ≡⟨ cong (λ s → s <> (x ∷ [])) (rev'md s p) ⟩
       (rev' p <> rev' s) <> (x ∷ [])
-      ≡⟨ sym (associativity ⦃ _ ⦄ ⦃ iLawfulSemigroupList ⦄ (rev' p) (rev' s) (x ∷ [])) ⟩
+      ≡⟨ sym (associativity (rev' p) (rev' s) (x ∷ [])) ⟩
       (rev' p) <> (rev' (x ∷ s))
       ∎
 
