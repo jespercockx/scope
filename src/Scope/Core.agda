@@ -31,10 +31,11 @@ opaque
   revScopeAcc : Scope name → Scope name → Scope name
   revScopeAcc [] acc = acc
   revScopeAcc (x ∷ s) acc = revScopeAcc s (x ∷ acc)
+  {-# COMPILE AGDA2HS revScopeAcc #-}
 
-  --TODO: find nicer syntax
   revScope : Scope name → Scope name
   revScope = flip revScopeAcc []
+  {-# COMPILE AGDA2HS revScope #-}
 
   instance
     iSemigroupScope : Semigroup (Scope name)
@@ -79,6 +80,11 @@ bindr α x = α <> [ x ]
 
 syntax bindr α x = α ▹ x
 
+~_ : Scope name → Scope name
+~_ = revScope
+infix 21 ~_
+{-# COMPILE AGDA2HS ~_ inline #-}
+
 opaque
   unfolding Scope iLawfulSemigroupScope iLawfulMonoidScope
 
@@ -88,7 +94,7 @@ opaque
   rezzBind = rezzCong2 _∷_ rezzErase
   {-# COMPILE AGDA2HS rezzBind #-}
 
-  revScopeAccComp : (s p : Scope name) → revScopeAcc s p ≡ revScope s <> p
+  revScopeAccComp : (s p : Scope name) → revScopeAcc s p ≡ ~ s <> p
   revScopeAccComp [] p = refl
   revScopeAccComp (x ∷ s) p
     rewrite (revScopeAccComp s (x ∷ p))
@@ -106,45 +112,44 @@ opaque
       rewrite (revScopeAccComp s (x ∷ []))
       = cong (λ t → t <> (x ∷ [])) (revsrev' s)
 
-    rev'md : (s p : Scope name) → rev' (s <> p) ≡ (rev' p) <> (rev' s)
-    rev'md [] p = sym (rightIdentity (rev' p))
-    rev'md (x ∷ s) p = begin
+    rev'Dist : (s p : Scope name) → rev' (s <> p) ≡ (rev' p) <> (rev' s)
+    rev'Dist [] p = sym (rightIdentity (rev' p))
+    rev'Dist (x ∷ s) p = begin
       rev' ((x ∷ s) <> p)
-      ≡⟨ cong (λ s → s <> (x ∷ [])) (rev'md s p) ⟩
+      ≡⟨ cong (λ s → s <> (x ∷ [])) (rev'Dist s p) ⟩
       (rev' p <> rev' s) <> (x ∷ [])
       ≡⟨ sym (associativity (rev' p) (rev' s) (x ∷ [])) ⟩
       (rev' p) <> (rev' (x ∷ s))
       ∎
 
-    rev'rev'id : (s : Scope name) → rev' (rev' s) ≡ s
-    rev'rev'id [] = refl
-    rev'rev'id (x ∷ s)
-      rewrite rev'md (rev' s) (x ∷ [])
-      rewrite rev'rev'id s
+    rev'Involution : (s : Scope name) → rev' (rev' s) ≡ s
+    rev'Involution [] = refl
+    rev'Involution (x ∷ s)
+      rewrite rev'Dist (rev' s) (x ∷ [])
+      rewrite rev'Involution s
       = refl
 
-    rev'bind : (s : Scope name) → (@0 x : name) → rev' (x ◃ s) ≡ (rev' s) ▹ x
-    rev'bind s x = refl
+    rev'BindComp : (s : Scope name) → (@0 x : name) → rev' (x ◃ s) ≡ (rev' s) ▹ x
+    rev'BindComp s x = refl
 
-  revScopeMempty : revScope {name = name} mempty ≡ mempty
-  revScopeMempty = refl
+  revsIdentity : revScope {name = name} mempty ≡ mempty
+  revsIdentity = refl
 
-  revsMappendDist : (s p : Scope name)
-                      → revScope (s <> p) ≡ (revScope p) <> (revScope s)
-  revsMappendDist s p
+  revsDist : (s p : Scope name) → ~ (s <> p) ≡ ~ p <> ~ s
+  revsDist s p
     rewrite revsrev' s
     rewrite revsrev' p
     rewrite revsrev' (s <> p)
-    = rev'md s p
+    = rev'Dist s p
 
-  revsRevsId : (s : Scope name) → revScope (revScope s) ≡ s
-  revsRevsId s
+  revsInvolution : (s : Scope name) → ~ ~ s ≡ s
+  revsInvolution s
     rewrite revsrev' s
     rewrite revsrev' (rev' s)
-    = rev'rev'id s
+    = rev'Involution s
 
-  revsBind : (s : Scope name) → (@0 x : name) → revScope (x ◃ s) ≡ (revScope s) ▹ x
-  revsBind s x
+  revsBindComp : (s : Scope name) → (@0 x : name) → ~ (x ◃ s) ≡ ~ s ▹ x
+  revsBindComp s x
     rewrite revsrev' (x ◃ s)
     rewrite revsrev' s
-    = rev'bind s x
+    = rev'BindComp s x
