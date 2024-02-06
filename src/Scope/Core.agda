@@ -72,18 +72,18 @@ bind : @0 name → Scope name → Scope name
 bind x α = singleton x <> α
 {-# COMPILE AGDA2HS bind #-}
 
+infixr 5 bind
 syntax bind x α = x ◃ α
 
 bindr : Scope name → name → Scope name
 bindr α x = α <> [ x ]
 {-# COMPILE AGDA2HS bindr #-}
 
+infixr 5 bindr
 syntax bindr α x = α ▹ x
 
-~_ : Scope name → Scope name
-~_ = revScope
-infix 21 ~_
-{-# COMPILE AGDA2HS ~_ inline #-}
+infix 7 revScope
+syntax revScope r = ~ r
 
 opaque
   unfolding Scope iLawfulSemigroupScope iLawfulMonoidScope
