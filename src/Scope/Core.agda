@@ -104,6 +104,9 @@ opaque
   rezzBind = rezzCong2 _∷_ rezzErase
   {-# COMPILE AGDA2HS rezzBind #-}
 
+  rezzUnbind : {@0 x : name} {@0 α : Scope name} → Rezz _ (x ◃ α) → Rezz _ α
+  rezzUnbind = rezzTail
+
   revScopeAccComp : (s p : Scope name) → revScopeAcc s p ≡ ~ s <> p
   revScopeAccComp [] p = refl
   revScopeAccComp (x ∷ s) p
