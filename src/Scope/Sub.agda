@@ -100,3 +100,8 @@ opaque
     let < q , _ > = splitAssoc (splitComm (splitRefl r)) p
     in  < q >
   {-# COMPILE AGDA2HS joinSubRight #-}
+
+opaque
+  unfolding Sub subBindKeep joinSubLeft
+  SubThings : Set₁
+  SubThings = Set

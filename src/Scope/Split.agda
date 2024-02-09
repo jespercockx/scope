@@ -221,3 +221,8 @@ opaque
   ∅-⋈-injective EmptyL = refl
   ∅-⋈-injective EmptyR = refl
   ∅-⋈-injective (ConsR x p) rewrite ∅-⋈-injective p = refl
+
+opaque
+  unfolding Split splitRefl rezzSplit splitJoin splitBindLeft decSplit
+  SplitThings : Set₁
+  SplitThings = Set

@@ -50,3 +50,8 @@ opaque
 diffCoerce : (p : α ⊆ β) (q : In x α) → diff q ⊆ diff (coerce p q)
 diffCoerce p q = diffSubTrans q p
 {-# COMPILE AGDA2HS diffCoerce #-}
+
+opaque
+  unfolding diff diffSubTrans
+  DiffThings : Set₁
+  DiffThings = Set

@@ -118,3 +118,8 @@ opaque
                (⟨ y ⟩ ⟨ Erased z ∷ β ⟩ ConsR z q)
       aux refl = refl
   {-# COMPILE AGDA2HS decIn #-}
+
+opaque
+  unfolding inHere inEmptyCase inJoinCase inBindCase inBindrCase decIn
+  InThings : Set₁
+  InThings = Set

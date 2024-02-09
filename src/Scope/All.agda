@@ -85,3 +85,9 @@ opaque
   allIn List.ANil = List.ANil
   allIn (List.ACons x al) = List.ACons (x , inHere) (mapAll (second inThere) (allIn al))
   {-# COMPILE AGDA2HS allIn #-}
+
+opaque
+  unfolding All lookupAll mapAll
+
+  AllThings : Set₁
+  AllThings = Set

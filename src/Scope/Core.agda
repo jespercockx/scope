@@ -166,3 +166,8 @@ opaque
     rewrite revsrev' (x ◃ s)
     rewrite revsrev' s
     = rev'BindComp s x
+
+opaque
+  unfolding Scope iLawfulMonoidScope caseScope rezzBind
+  ScopeCoreThings : Set₁
+  ScopeCoreThings = Set
