@@ -86,6 +86,16 @@ infix 7 revScope
 syntax revScope r = ~ r
 
 opaque
+  unfolding Scope
+
+  caseScope : (α : Scope name) 
+            → (@0 {{α ≡ mempty}} → c)
+            → ((@0 x : name) (β : Scope name) → @0 {{α ≡ x ◃ β}} → c)
+            → c
+  caseScope [] emptyCase bindCase = emptyCase
+  caseScope (Erased x ∷ β) emptyCase bindCase = bindCase x β
+
+opaque
   unfolding Scope iLawfulSemigroupScope iLawfulMonoidScope
 
   rezzBind
