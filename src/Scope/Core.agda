@@ -66,7 +66,7 @@ bind x α = singleton x <> α
 infixr 5 bind
 syntax bind x α = x ◃ α
 
-bindr : Scope name → name → Scope name
+bindr : Scope name → @0 name → Scope name
 bindr α x = α <> [ x ]
 {-# COMPILE AGDA2HS bindr #-}
 
