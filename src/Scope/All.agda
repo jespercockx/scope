@@ -2,6 +2,7 @@ module Scope.All where
 
 open import Haskell.Prelude hiding (All)
 open import Haskell.Extra.Erase
+open import Haskell.Extra.Refinement
 open import Haskell.Prim.Tuple using (second)
 
 import Utils.List as List
@@ -81,10 +82,25 @@ opaque
   tabulateAll (rezz (x ∷ α)) f = List.ACons (f inHere) (tabulateAll (rezz-id) (f ∘ inThere))
   {-# COMPILE AGDA2HS tabulateAll #-}
 
-  allIn : {@0 l : Scope name} → All p l → All (λ el → (p el) × (el ∈ l)) l
+  allIn : {@0 l : Scope name} → All p l → All (λ el → p el × el ∈ l) l
   allIn List.ANil = List.ANil
   allIn (List.ACons x al) = List.ACons (x , inHere) (mapAll (second inThere) (allIn al))
   {-# COMPILE AGDA2HS allIn #-}
+
+opaque
+  unfolding All
+  -- for refl and lp to typecheck
+  unfolding lookupAll inHere subLeft splitRefl subBindDrop subJoinDrop splitJoinRight
+
+  allLookup : {@0 l : Scope name}
+            → (ls : All p l)
+            → All (λ el → ∃ (el ∈ l × p el) (λ (i , pi) → lookupAll ls i ≡ pi)) l
+  allLookup List.ANil = List.ANil
+  allLookup (List.ACons ph ls) =
+    List.ACons ((inHere , ph) ⟨ refl ⟩)
+               (mapAll (λ where
+                 ((i , pi) ⟨ lp ⟩) → ((inThere i) , pi) ⟨ lp ⟩) (allLookup ls))
+  {-# COMPILE AGDA2HS allLookup #-}
 
 opaque
   unfolding All lookupAll mapAll
