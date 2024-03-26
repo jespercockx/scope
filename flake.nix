@@ -16,6 +16,9 @@
       let
         pkgs = import nixpkgs {inherit system;};
         agdaDerivation = pkgs.callPackage mkAgdaDerivation.lib.mkAgdaDerivation {};
+        agda2hs-lib = agda2hs.packages.${system}.agda2hs-lib;
+        agda2hs-custom = agda2hs.lib.${system}.withPackages [agda2hs-lib];
+        scope-hs = pkgs.haskellPackages.callPackage ./scope.nix {agda2hs = agda2hs-custom;};
         scope-lib = agdaDerivation
           { pname = "scope";
             meta = {};
@@ -29,7 +32,8 @@
       in {
         packages = {
           inherit scope-lib;
-          default = scope-lib;
+          inherit scope-hs;
+          default = scope-hs;
         };
       });
 }
