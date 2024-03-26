@@ -2,7 +2,9 @@
   "nodes": {
     "agda2hs": {
       "inputs": {
-        "flake-utils": "flake-utils",
+        "flake-utils": [
+          "flake-utils"
+        ],
         "mkAgdaDerivation": [
           "mkAgdaDerivation"
         ],
@@ -11,11 +13,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1711465177,
-        "narHash": "sha256-COe1mvhOHF9KzZDb9YnwcNJ5ZTyxAq90nHvzsp+42W0=",
+        "lastModified": 1711466913,
+        "narHash": "sha256-V4u8Xd9gxc+NuAVdseK3hDfOSXiFDqX7xFHSEa4HxZc=",
         "owner": "liesnikov",
         "repo": "agda2hs",
-        "rev": "db09d73a2319b131750e18bde8adc3bc73d953a0",
+        "rev": "d85f3d44aeafa5baf3bd089f47a4a84c5cec0446",
         "type": "github"
       },
       "original": {
@@ -27,24 +29,6 @@
     "flake-utils": {
       "inputs": {
         "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1710146030,
-        "narHash": "sha256-SZ5L6eA7HJ/nmkzGG7/ISclqe6oZdOZTNoesiInkXPQ=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "b1d9ab70662946ef0850d488da1c9019f3a9752a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_2": {
-      "inputs": {
-        "systems": "systems_2"
       },
       "locked": {
         "lastModified": 1710146030,
@@ -94,27 +78,12 @@
     "root": {
       "inputs": {
         "agda2hs": "agda2hs",
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils",
         "mkAgdaDerivation": "mkAgdaDerivation",
         "nixpkgs": "nixpkgs"
       }
     },
     "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_2": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",

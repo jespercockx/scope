@@ -7,6 +7,7 @@
   inputs.agda2hs = {
     url = "github:liesnikov/agda2hs";
     inputs.nixpkgs.follows = "nixpkgs";
+    inputs.flake-utils.follows = "flake-utils";
     inputs.mkAgdaDerivation.follows = "mkAgdaDerivation";
   };
 
