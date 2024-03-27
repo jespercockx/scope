@@ -27,16 +27,16 @@
             ];
             src = ./.;
           };
-
-        compiler = "ghc94";
-        withCompiler = compiler:
-          let haskellPackages =
-                if compiler == "default"
-                then pkgs.haskellPackages
-                else pkgs.haskell.packages.${compiler};
-              agda2hs-custom = (agda2hs.lib.${system}.withCompiler compiler).withPackages [agda2hs-lib];
-          in haskellPackages.callPackage ./scope.nix {agda2hs = agda2hs-custom;};
-       scope-hs = withCompiler compiler;
+        helper = agda2hs.lib.${system};
+        hpkgs = pkgs.haskell.packages.ghc96;
+        agda2hs-ghc96 = pkgs.callPackage (helper.agda2hs-expr) {
+          inherit self;
+          agda2hs = hpkgs.callPackage (helper.agda2hs-pkg "--jailbreak") {};
+          inherit (hpkgs) ghcWithPackages;
+        };
+        agda2hs-custom = agda2hs-ghc96.withPackages [agda2hs-lib];
+        scope-pkg = import ./scope.nix;
+        scope-hs = pkgs.haskell.packages.ghc94.callPackage scope-pkg {agda2hs = agda2hs-custom;};
       in {
         packages = {
           inherit scope-lib;
@@ -44,7 +44,7 @@
           default = scope-hs;
         };
         lib = {
-          inherit withCompiler;
+          inherit scope-pkg;
         };
       });
 }
