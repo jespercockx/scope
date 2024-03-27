@@ -13,11 +13,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1711466913,
-        "narHash": "sha256-V4u8Xd9gxc+NuAVdseK3hDfOSXiFDqX7xFHSEa4HxZc=",
+        "lastModified": 1711545796,
+        "narHash": "sha256-SEbDNcd5LrAo1x/mmXhhbL11MK9t8C6oXh4T6/VI5ps=",
         "owner": "liesnikov",
         "repo": "agda2hs",
-        "rev": "d85f3d44aeafa5baf3bd089f47a4a84c5cec0446",
+        "rev": "d576bf5d3672efc65569b8e463e0a199c9a4e887",
         "type": "github"
       },
       "original": {
