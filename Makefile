@@ -1,0 +1,32 @@
+AGDA2HS = agda2hs
+FLAGS =
+LIBRARIES =
+
+.PHONY: app alllib clean clean-lib clean-agdai nix-tc nix-build
+
+alllib: lib lib/Scope/All.hs lib/Scope/Core.hs lib/Scope/Diff.hs lib/Scope/In.hs lib/Scope/Split.hs lib/Scope/Sub.hs
+
+# alllib: lib lib/*.hs
+
+lib:
+	mkdir lib
+
+lib/%.hs: src/%.agda
+	$(AGDA2HS) $(FLAGS) $(LIBRARIES) $< -o lib
+
+clean: clean-lib clean-agdai
+
+clean-lib:
+	rm -rf lib
+
+clean-agdai:
+	rm -f src/*.agdai
+
+cabal-build: alllib
+	cabal build
+
+nix-tc:
+	nix build .#scope-lib --print-build-logs
+
+nix-build:
+	nix build .#scope-hs --print-build-logs
