@@ -1,4 +1,4 @@
-name: "Build scope library"
+name: "Typecheck scope library"
 on:
   pull_request:
   push:
@@ -9,4 +9,4 @@ jobs:
     - uses: actions/checkout@v3
     - uses: cachix/install-nix-action@v22
     - uses: DeterminateSystems/magic-nix-cache-action@v2
-    - run: nix build .#scope-hs --print-build-logs
+    - run: nix build .#scope-lib --print-build-logs
