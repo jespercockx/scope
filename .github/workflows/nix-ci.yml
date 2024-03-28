@@ -4,11 +4,17 @@ on:
   push:
 jobs:
   nix-build:
-    name: Build ${{ matrix.derivation }} with nix
+    name: ${{ matrix.pretty }} with nix (${{ matrix.derivation }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         derivation: [scope-hs, scope-lib]
+        include:
+          - pretty: "Building haskell library"
+            derivation: scope-hs
+          - pretty: "Typechecking with agda"
+            derivation: scope-lib
     steps:
     - uses: actions/checkout@v3
     - uses: cachix/install-nix-action@v22
