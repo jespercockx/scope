@@ -1,0 +1,16 @@
+name: "CI"
+on:
+  pull_request:
+  push:
+jobs:
+  nix-build:
+    name: Build ${{ matrix.derivation }} with nix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        derivation: [scope-hs, scope-lib]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v22
+    - uses: DeterminateSystems/magic-nix-cache-action@v2
+    - run: nix build .#${{ matrix.derivation }} --print-build-logs
