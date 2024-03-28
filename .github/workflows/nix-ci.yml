@@ -11,9 +11,9 @@ jobs:
       matrix:
         derivation: [scope-hs, scope-lib]
         include:
-          - pretty: "Building haskell library"
+          - pretty: "Build Haskell library"
             derivation: scope-hs
-          - pretty: "Typechecking with agda"
+          - pretty: "Typecheck with Agda"
             derivation: scope-lib
     steps:
     - uses: actions/checkout@v3
