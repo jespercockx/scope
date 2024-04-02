@@ -3,28 +3,28 @@
 
   inputs.nixpkgs.url = github:NixOS/nixpkgs;
   inputs.flake-utils.url = github:numtide/flake-utils;
-  inputs.mkAgdaDerivation.url = github:liesnikov/mkAgdaDerivation;
   inputs.agda2hs = {
     url = "github:liesnikov/agda2hs";
     inputs.nixpkgs.follows = "nixpkgs";
     inputs.flake-utils.follows = "flake-utils";
-    inputs.mkAgdaDerivation.follows = "mkAgdaDerivation";
   };
 
-  outputs = {self, nixpkgs, flake-utils, mkAgdaDerivation, agda2hs}:
+  outputs = {self, nixpkgs, flake-utils, agda2hs}:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {inherit system;};
-        agdaDerivation = pkgs.callPackage mkAgdaDerivation.lib.mkAgdaDerivation {};
         agda2hs-lib = agda2hs.packages.${system}.agda2hs-lib;
-        scope-lib = agdaDerivation
+        scope-lib = pkgs.agdaPackages.mkDerivation
           { pname = "scope";
             meta = {};
             version = "0.1.0.0";
-            tcDir = "src";
             buildInputs = [
               agda2hs.packages.${system}.agda2hs-lib
             ];
+            preBuild = ''
+              echo "module Everything where" > Everything.agda
+              find src -name '*.agda' | sed -e 's/src\///;s/\//./g;s/\.agda$//;s/^/import /' >> Everything.agda
+            '';
             src = ./.;
           };
         helper = agda2hs.lib.${system};
@@ -39,8 +39,7 @@
         scope-hs = pkgs.haskell.packages.ghc94.callPackage scope-pkg {agda2hs = agda2hs-custom;};
       in {
         packages = {
-          inherit scope-lib;
-          inherit scope-hs;
+          inherit scope-hs scope-lib;
           default = scope-hs;
         };
         lib = {
