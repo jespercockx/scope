@@ -82,19 +82,22 @@ opaque
   tabulateAll (rezz (x ∷ α)) f = List.ACons (f inHere) (tabulateAll (rezz-id) (f ∘ inThere))
   {-# COMPILE AGDA2HS tabulateAll #-}
 
-  allIn : {@0 l : Scope name} → All p l → All (λ el → p el × el ∈ l) l
+  allIn : All p α → All (λ el → p el × el ∈ α) α
   allIn List.ANil = List.ANil
   allIn (List.ACons x al) = List.ACons (x , inHere) (mapAll (second inThere) (allIn al))
   {-# COMPILE AGDA2HS allIn #-}
+
+  rezzAll : All p α → Rezz _ α
+  rezzAll List.ANil = rezz []
+  rezzAll (List.ACons {x = x} _ xs) = rezzCong2 (_∷_) rezzErase (rezzAll xs)
 
 opaque
   unfolding All
   -- for refl and lp to typecheck
   unfolding lookupAll inHere subLeft splitRefl subBindDrop subJoinDrop splitJoinRight
 
-  allLookup : {@0 l : Scope name}
-            → (ls : All p l)
-            → All (λ el → ∃ (el ∈ l × p el) (λ (i , pi) → lookupAll ls i ≡ pi)) l
+  allLookup : (ls : All p α)
+            → All (λ el → ∃ (el ∈ α × p el) (λ (i , pi) → lookupAll ls i ≡ pi)) α
   allLookup List.ANil = List.ANil
   allLookup (List.ACons ph ls) =
     List.ACons ((inHere , ph) ⟨ refl ⟩)
