@@ -1,8 +1,10 @@
 module Scope.All where
 
 open import Haskell.Prelude hiding (All)
+open import Haskell.Extra.Dec
 open import Haskell.Extra.Erase
 open import Haskell.Extra.Refinement
+open import Haskell.Law.Equality
 open import Haskell.Prim.Tuple using (second)
 
 import Utils.List as List
@@ -90,6 +92,21 @@ opaque
   rezzAll : All p α → Rezz _ α
   rezzAll List.ANil = rezz []
   rezzAll (List.ACons {x = x} _ xs) = rezzCong2 (_∷_) rezzErase (rezzAll xs)
+  {-# COMPILE AGDA2HS rezzAll #-}
+
+  allInScope : ∀ {@0 γ}
+               (als : All (λ c → c ∈ γ) α)
+               (bls : All (λ c → c ∈ γ) β)
+             → Maybe (Erase (α ≡ β))
+  allInScope List.ANil                  List.ANil = Just (Erased refl)
+  allInScope List.ANil                  (List.ACons _ _) = Nothing
+  allInScope (List.ACons         _ _)   List.ANil = Nothing
+  allInScope (List.ACons {x = x} p als) (List.ACons q bls) = do
+    rt ← allInScope als bls
+    ifDec (decIn p q)
+      (λ where {{refl}} → Just (Erased (cong (λ t → bind (get x) t) (get rt))))
+      Nothing
+  {-# COMPILE AGDA2HS allInScope #-}
 
 opaque
   unfolding All
