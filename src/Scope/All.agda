@@ -18,7 +18,7 @@ open import Scope.Split
 private variable
   @0 name : Set
   @0 α β  : Scope name
-  @0 x    : name
+  @0 x y  : name
   p q     : @0 name → Set
 
 opaque
@@ -65,6 +65,21 @@ opaque
       Nothing → findAll al (λ pel i → qc pel (inThere i))
   {-# COMPILE AGDA2HS findAll #-}
 
+opaque
+  unfolding All Sub Split lookupAll inHere splitRefl
+
+  lookupHere : (l : All p α) (ph : p x)
+             → lookupAll (allJoin (allSingl ph) l) inHere ≡ ph
+  lookupHere _ _ = refl
+
+opaque
+  unfolding All Sub Split lookupAll inThere subBindDrop subJoinDrop splitJoinRight
+
+  lookupThere : {ph : p y} {pi : p x} {l : All p α} {i : x ∈ α}
+              → lookupAll l i ≡ pi
+              → lookupAll (allJoin (allSingl ph) l) (inThere i) ≡ pi
+  lookupThere p = p
+
 _!_ : {p : @0 name → Set} {@0 α : Scope name}
     → All p α → (@0 x : name) → {@(tactic auto) ok : x ∈ α} → p x
 (ps ! _) {s} = lookupAll ps s
@@ -109,17 +124,16 @@ opaque
   {-# COMPILE AGDA2HS allInScope #-}
 
 opaque
-  unfolding All
-  -- for refl and lp to typecheck
-  unfolding lookupAll inHere subLeft splitRefl subBindDrop subJoinDrop splitJoinRight
+  unfolding All lookupAll
 
   allLookup : (ls : All p α)
             → All (λ el → ∃ (el ∈ α × p el) (λ (i , pi) → lookupAll ls i ≡ pi)) α
   allLookup List.ANil = List.ANil
   allLookup (List.ACons ph ls) =
-    List.ACons ((inHere , ph) ⟨ refl ⟩)
-               (mapAll (λ where
-                 ((i , pi) ⟨ lp ⟩) → ((inThere i) , pi) ⟨ lp ⟩) (allLookup ls))
+    List.ACons
+      ((inHere , ph) ⟨ lookupHere ls ph ⟩)
+      (mapAll (λ where ((i , pi) ⟨ lp ⟩) → ((inThere i) , pi) ⟨ lookupThere lp ⟩)
+              (allLookup ls))
   {-# COMPILE AGDA2HS allLookup #-}
 
 opaque
