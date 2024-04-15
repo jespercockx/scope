@@ -4,7 +4,7 @@
   inputs.nixpkgs.url = github:NixOS/nixpkgs;
   inputs.flake-utils.url = github:numtide/flake-utils;
   inputs.agda2hs = {
-    url = "github:liesnikov/agda2hs";
+    url = "github:agda/agda2hs";
     inputs.nixpkgs.follows = "nixpkgs";
     inputs.flake-utils.follows = "flake-utils";
   };
