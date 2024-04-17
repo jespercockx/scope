@@ -83,6 +83,7 @@ opaque
             → c
   caseScope [] emptyCase bindCase = emptyCase
   caseScope (Erased x ∷ β) emptyCase bindCase = bindCase x β
+  {-# COMPILE AGDA2HS caseScope #-}
 
 opaque
   unfolding Scope iLawfulSemigroupScope iLawfulMonoidScope
@@ -95,7 +96,7 @@ opaque
 
   rezzUnbind : {@0 x : name} {@0 α : Scope name} → Rezz _ (x ◃ α) → Rezz _ α
   rezzUnbind = rezzTail
-
+  {-# COMPILE AGDA2HS rezzUnbind #-}
 
 opaque
   unfolding Scope iLawfulMonoidScope caseScope rezzBind
