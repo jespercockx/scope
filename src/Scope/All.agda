@@ -94,7 +94,7 @@ opaque
   mapAll f (List.ACons p ps) = List.ACons (f p) (mapAll f ps)
   {-# COMPILE AGDA2HS mapAll #-}
 
-  tabulateAll : Rezz _ α → (f : ∀ {@0 x} → (x ∈ α) → p x) → All p α
+  tabulateAll : Rezz α → (f : ∀ {@0 x} → (x ∈ α) → p x) → All p α
   tabulateAll (rezz []) f = List.ANil
   tabulateAll (rezz (x ∷ α)) f = List.ACons (f inHere) (tabulateAll (rezz-id) (f ∘ inThere))
   {-# COMPILE AGDA2HS tabulateAll #-}
@@ -104,7 +104,7 @@ opaque
   allIn (List.ACons x al) = List.ACons (x , inHere) (mapAll (second inThere) (allIn al))
   {-# COMPILE AGDA2HS allIn #-}
 
-  rezzAll : All p α → Rezz _ α
+  rezzAll : All p α → Rezz α
   rezzAll List.ANil = rezz []
   rezzAll (List.ACons {x = x} _ xs) = rezzCong2 (_∷_) rezzErase (rezzAll xs)
   {-# COMPILE AGDA2HS rezzAll #-}

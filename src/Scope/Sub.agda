@@ -44,26 +44,26 @@ opaque
   subRefl = subLeft splitEmptyRight
   {-# COMPILE AGDA2HS subRefl #-}
 
-  rezzSub : α ⊆ β → Rezz _ β → Rezz _ α
+  rezzSub : α ⊆ β → Rezz β → Rezz α
   rezzSub < p > = rezzSplitLeft p
   {-# COMPILE AGDA2HS rezzSub #-}
 
-  subJoin : Rezz _ α₂
+  subJoin : Rezz α₂
           → α₁ ⊆ α₂
           → β₁ ⊆ β₂
           → (α₁ <> β₁) ⊆ (α₂ <> β₂)
   subJoin r < p > < q > = < splitJoin r p q >
   {-# COMPILE AGDA2HS subJoin #-}
 
-  subJoinKeep : Rezz _ α → β₁ ⊆ β₂ → (α <> β₁) ⊆ (α <> β₂)
+  subJoinKeep : Rezz α → β₁ ⊆ β₂ → (α <> β₁) ⊆ (α <> β₂)
   subJoinKeep r < p > = < splitJoinLeft r p >
   {-# COMPILE AGDA2HS subJoinKeep #-}
 
-  subJoinDrop : Rezz _ α → β₁ ⊆ β₂ → β₁ ⊆ (α <> β₂)
+  subJoinDrop : Rezz α → β₁ ⊆ β₂ → β₁ ⊆ (α <> β₂)
   subJoinDrop r < p > = < splitJoinRight r p >
   {-# COMPILE AGDA2HS subJoinDrop #-}
 
-  subJoinHere : Rezz _ α₂ → α₁ ⊆ α₂ → α₁ ⊆ (α₂ <> β)
+  subJoinHere : Rezz α₂ → α₁ ⊆ α₂ → α₁ ⊆ (α₂ <> β)
   subJoinHere r < p > = < splitJoinRightr r p >
   {-# COMPILE AGDA2HS subJoinHere #-}
 
@@ -78,24 +78,24 @@ opaque
   subBindDrop {y = y} = subJoinDrop (rezz (singleton y))
   {-# COMPILE AGDA2HS subBindDrop #-}
 
-  subBindrKeep : Rezz _ β → α ⊆ β → (bindr α y) ⊆ (bindr β y)
+  subBindrKeep : Rezz β → α ⊆ β → (bindr α y) ⊆ (bindr β y)
   subBindrKeep {y = y} r < p > = < splitBindrLeft r p >
   {-# COMPILE AGDA2HS subBindrKeep #-}
 
-  subBindrDrop : Rezz _ β → α ⊆ β → α ⊆ (bindr β y)
+  subBindrDrop : Rezz β → α ⊆ β → α ⊆ (bindr β y)
   subBindrDrop {y = y} r < p > = < splitBindrRight r p >
   {-# COMPILE AGDA2HS subBindrDrop #-}
 
 opaque
   unfolding Sub
 
-  joinSubLeft : Rezz _ α₁ → (α₁ <> α₂) ⊆ β → α₁ ⊆ β
+  joinSubLeft : Rezz α₁ → (α₁ <> α₂) ⊆ β → α₁ ⊆ β
   joinSubLeft r < p > =
     let < q , _ > = splitAssoc (splitRefl r) p
     in  < q >
   {-# COMPILE AGDA2HS joinSubLeft #-}
 
-  joinSubRight : Rezz _ α₁ → (α₁ <> α₂) ⊆ β → α₂ ⊆ β
+  joinSubRight : Rezz α₁ → (α₁ <> α₂) ⊆ β → α₂ ⊆ β
   joinSubRight r < p > =
     let < q , _ > = splitAssoc (splitComm (splitRefl r)) p
     in  < q >

@@ -54,7 +54,7 @@ opaque
   splitEmptyRight = EmptyR
   {-# COMPILE AGDA2HS splitEmptyRight #-}
 
-  splitRefl : Rezz _ α → α ⋈ β ≡ (α <> β)
+  splitRefl : Rezz α → α ⋈ β ≡ (α <> β)
   splitRefl (rezz []) = splitEmptyLeft
   splitRefl (rezz (Erased x ∷ α)) = ConsL x (splitRefl (rezz α))
   {-# COMPILE AGDA2HS splitRefl #-}
@@ -114,7 +114,7 @@ opaque
 opaque
   unfolding Split
 
-  rezzSplit : α ⋈ β ≡ γ → Rezz _ γ → Rezz _ α × Rezz _ β
+  rezzSplit : α ⋈ β ≡ γ → Rezz γ → Rezz α × Rezz β
   rezzSplit EmptyL r = rezz mempty , r
   rezzSplit EmptyR r = r , rezz mempty
   rezzSplit (ConsL x p) r =
@@ -128,26 +128,26 @@ opaque
 opaque
   unfolding Split
 
-  rezzSplitLeft : α ⋈ β ≡ γ → Rezz _ γ → Rezz _ α
+  rezzSplitLeft : α ⋈ β ≡ γ → Rezz γ → Rezz α
   rezzSplitLeft p r = fst (rezzSplit p r)
   {-# COMPILE AGDA2HS rezzSplitLeft #-}
 
-  rezzSplitRight : α ⋈ β ≡ γ → Rezz _ γ → Rezz _ β
+  rezzSplitRight : α ⋈ β ≡ γ → Rezz γ → Rezz β
   rezzSplitRight p r = snd (rezzSplit p r)
   {-# COMPILE AGDA2HS rezzSplitRight #-}
 
-  splitJoinLeft : Rezz _ α → β₁ ⋈ β₂ ≡ β → (α <> β₁) ⋈ β₂ ≡ (α <> β)
+  splitJoinLeft : Rezz α → β₁ ⋈ β₂ ≡ β → (α <> β₁) ⋈ β₂ ≡ (α <> β)
   splitJoinLeft (rezz []) p = p
   splitJoinLeft (rezz (Erased x ∷ α)) p = ConsL x (splitJoinLeft (rezz α) p)
   {-# COMPILE AGDA2HS splitJoinLeft #-}
 
-  splitJoinRight : Rezz _ α → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (α <> β₂) ≡ (α <> β)
+  splitJoinRight : Rezz α → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (α <> β₂) ≡ (α <> β)
   splitJoinRight (rezz []) p = p
   splitJoinRight (rezz (Erased x ∷ α)) p = ConsR x (splitJoinRight (rezz α) p)
   {-# COMPILE AGDA2HS splitJoinRight #-}
 
   splitJoin
-    : Rezz _ α
+    : Rezz α
     → α₁ ⋈ α₂ ≡ α
     → β₁ ⋈ β₂ ≡ β
     → (α₁ <> β₁) ⋈ (α₂ <> β₂) ≡ (α <> β)
@@ -157,13 +157,13 @@ opaque
   splitJoin r (ConsR x p) q = ConsR x (splitJoin (rezzTail r) p q)
   {-# COMPILE AGDA2HS splitJoin #-}
 
-splitJoinLeftr : Rezz _ β → β₁ ⋈ β₂ ≡ β → (β₁ <> α) ⋈ β₂ ≡ (β <> α)
-splitJoinLeftr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p = 
+splitJoinLeftr : Rezz β → β₁ ⋈ β₂ ≡ β → (β₁ <> α) ⋈ β₂ ≡ (β <> α)
+splitJoinLeftr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
   subst (λ γ → (β₁ <> α) ⋈ γ ≡ (β <> α)) (rightIdentity _) (splitJoin r p splitEmptyRight)
 {-# COMPILE AGDA2HS splitJoinLeftr #-}
 
-splitJoinRightr : Rezz _ β → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (β₂ <> α) ≡ (β <> α)
-splitJoinRightr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p = 
+splitJoinRightr : Rezz β → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (β₂ <> α) ≡ (β <> α)
+splitJoinRightr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
   subst (λ γ → γ ⋈ (β₂ <> α) ≡ (β <> α)) (rightIdentity _) (splitJoin r p splitEmptyLeft)
 {-# COMPILE AGDA2HS splitJoinRightr #-}
 
@@ -178,11 +178,11 @@ opaque
   splitBindRight {x = x} = splitJoinRight (rezz (singleton x))
   {-# COMPILE AGDA2HS splitBindRight #-}
 
-  splitBindrLeft : Rezz _ γ → α ⋈ β ≡ γ → (bindr α x) ⋈ β ≡ (bindr γ x)
+  splitBindrLeft : Rezz γ → α ⋈ β ≡ γ → (bindr α x) ⋈ β ≡ (bindr γ x)
   splitBindrLeft {x = x} r p = splitJoinLeftr r p
   {-# COMPILE AGDA2HS splitBindrLeft #-}
 
-  splitBindrRight : Rezz _ γ → α ⋈ β ≡ γ → α ⋈ (bindr β x) ≡ (bindr γ x)
+  splitBindrRight : Rezz γ → α ⋈ β ≡ γ → α ⋈ (bindr β x) ≡ (bindr γ x)
   splitBindrRight {x = x} = splitJoinRightr
   {-# COMPILE AGDA2HS splitBindrRight #-}
 
@@ -207,12 +207,12 @@ opaque
   decSplit (ConsR x p) (ConsR x q) = mapDec (cong (ConsR x)) (λ where refl → refl) (decSplit p q)
   decSplit (EmptyL   ) (EmptyR   ) = False ⟨ (λ ()) ⟩
   decSplit (EmptyL   ) (ConsR y q) = False ⟨ (λ ()) ⟩
-  decSplit (EmptyR   ) (EmptyL   ) = False ⟨ (λ ()) ⟩ 
-  decSplit (EmptyR   ) (ConsL x q) = False ⟨ (λ ()) ⟩ 
-  decSplit (ConsL x p) (EmptyR   ) = False ⟨ (λ ()) ⟩ 
-  decSplit (ConsL x p) (ConsR x q) = False ⟨ (λ ()) ⟩ 
-  decSplit (ConsR x p) (EmptyL   ) = False ⟨ (λ ()) ⟩ 
-  decSplit (ConsR x p) (ConsL x q) = False ⟨ (λ ()) ⟩ 
+  decSplit (EmptyR   ) (EmptyL   ) = False ⟨ (λ ()) ⟩
+  decSplit (EmptyR   ) (ConsL x q) = False ⟨ (λ ()) ⟩
+  decSplit (ConsL x p) (EmptyR   ) = False ⟨ (λ ()) ⟩
+  decSplit (ConsL x p) (ConsR x q) = False ⟨ (λ ()) ⟩
+  decSplit (ConsR x p) (EmptyL   ) = False ⟨ (λ ()) ⟩
+  decSplit (ConsR x p) (ConsL x q) = False ⟨ (λ ()) ⟩
   {-# COMPILE AGDA2HS decSplit #-}
 
   syntax decSplit p q = p ⋈-≟ q

@@ -77,7 +77,7 @@ syntax bindr α x = α ▹ x
 opaque
   unfolding Scope
 
-  caseScope : (α : Scope name) 
+  caseScope : (α : Scope name)
             → (@0 {{α ≡ mempty}} → c)
             → ((@0 x : name) (β : Scope name) → @0 {{α ≡ x ◃ β}} → c)
             → c
@@ -90,11 +90,11 @@ opaque
 
   rezzBind
     : {@0 α : Scope name} {@0 x : name}
-    → Rezz _ α → Rezz _ (bind x α)
+    → Rezz α → Rezz (bind x α)
   rezzBind = rezzCong2 _∷_ rezzErase
   {-# COMPILE AGDA2HS rezzBind #-}
 
-  rezzUnbind : {@0 x : name} {@0 α : Scope name} → Rezz _ (x ◃ α) → Rezz _ α
+  rezzUnbind : {@0 x : name} {@0 α : Scope name} → Rezz (x ◃ α) → Rezz α
   rezzUnbind = rezzTail
   {-# COMPILE AGDA2HS rezzUnbind #-}
 
