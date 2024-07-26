@@ -137,7 +137,8 @@ opaque
   {-# COMPILE AGDA2HS allLookup #-}
 
 opaque
-  unfolding All lookupAll mapAll
+  unfolding All findAll lookupAll lookupHere lookupThere
+  unfolding mapAll tabulateAll allIn rezzAll allInScope allLookup
 
   AllThings : Set₁
   AllThings = Set
