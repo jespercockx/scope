@@ -28,13 +28,12 @@
             src = ./.;
           };
         helper = agda2hs.lib.${system};
-        hpkgs = pkgs.haskell.packages.ghc96;
-        agda2hs-ghc96 = pkgs.callPackage (helper.agda2hs-expr) {
+        agda2hs-drv = pkgs.callPackage (helper.agda2hs-expr) {
           inherit self;
-          agda2hs = hpkgs.callPackage (helper.agda2hs-pkg "--jailbreak") {};
-          inherit (hpkgs) ghcWithPackages;
+          agda2hs = pkgs.haskellPackages.callPackage (helper.agda2hs-pkg "") {};
+          inherit (pkgs.haskellPackages) ghcWithPackages;
         };
-        agda2hs-custom = agda2hs-ghc96.withPackages [agda2hs-lib];
+        agda2hs-custom = agda2hs-drv.withPackages [agda2hs-lib];
         scope-pkg = import ./scope.nix;
         scope-hs = pkgs.haskell.packages.ghc94.callPackage scope-pkg {agda2hs = agda2hs-custom;};
       in {
