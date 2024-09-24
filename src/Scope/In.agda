@@ -20,13 +20,13 @@ private variable
 
 In : @0 name → @0 Scope name → Set
 In x α = singleton x ⊆ α
-{-# COMPILE AGDA2HS In #-}
+{-# COMPILE AGDA2HS In inline #-}
 
 syntax In x α = x ∈ α
 
 coerce : α ⊆ β → x ∈ α → x ∈ β
 coerce p q = subTrans q p
-{-# COMPILE AGDA2HS coerce #-}
+{-# COMPILE AGDA2HS coerce inline #-}
 
 opaque
 

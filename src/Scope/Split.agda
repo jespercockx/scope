@@ -39,7 +39,7 @@ opaque
   Split : (@0 α β γ : Scope name) → Set
   Split = ListSplit
 
-  {-# COMPILE AGDA2HS Split #-}
+  {-# COMPILE AGDA2HS Split inline #-}
 
   syntax Split α β γ = α ⋈ β ≡ γ
 
@@ -48,11 +48,11 @@ opaque
 
   splitEmptyLeft : mempty ⋈ β ≡ β
   splitEmptyLeft = EmptyL
-  {-# COMPILE AGDA2HS splitEmptyLeft #-}
+  {-# COMPILE AGDA2HS splitEmptyLeft inline #-}
 
   splitEmptyRight : α ⋈ mempty ≡ α
   splitEmptyRight = EmptyR
-  {-# COMPILE AGDA2HS splitEmptyRight #-}
+  {-# COMPILE AGDA2HS splitEmptyRight inline #-}
 
   splitRefl : Rezz α → α ⋈ β ≡ (α <> β)
   splitRefl (rezz []) = splitEmptyLeft
@@ -180,11 +180,11 @@ opaque
 
   splitBindrLeft : Rezz γ → α ⋈ β ≡ γ → (bindr α x) ⋈ β ≡ (bindr γ x)
   splitBindrLeft {x = x} r p = splitJoinLeftr r p
-  {-# COMPILE AGDA2HS splitBindrLeft #-}
+  {-# COMPILE AGDA2HS splitBindrLeft inline #-}
 
   splitBindrRight : Rezz γ → α ⋈ β ≡ γ → α ⋈ (bindr β x) ≡ (bindr γ x)
   splitBindrRight {x = x} = splitJoinRightr
-  {-# COMPILE AGDA2HS splitBindrRight #-}
+  {-# COMPILE AGDA2HS splitBindrRight inline #-}
 
 {-
 The following statement is FALSE:

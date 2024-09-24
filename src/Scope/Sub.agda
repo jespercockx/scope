@@ -14,7 +14,7 @@ private variable
 opaque
   Sub : (@0 α β  : Scope name) → Set
   Sub α β = Σ0 _ (λ γ → α ⋈ γ ≡ β)
-  {-# COMPILE AGDA2HS Sub #-}
+  {-# COMPILE AGDA2HS Sub inline #-}
 
   syntax Sub α β = α ⊆ β
 
@@ -30,7 +30,7 @@ opaque
 
   subRight : α ⋈ β ≡ γ → β ⊆ γ
   subRight p = < splitComm p >
-  {-# COMPILE AGDA2HS subRight #-}
+  {-# COMPILE AGDA2HS subRight inline #-}
 
   subWeaken : α ⊆ β → α ⊆ (bind x β)
   subWeaken < p > = < splitBindRight p >

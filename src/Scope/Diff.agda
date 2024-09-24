@@ -31,12 +31,12 @@ opaque
 
   diffSub : (p : α ⊆ β) → diff p ⊆ β
   diffSub p = subRight (splitDiff p)
-  {-# COMPILE AGDA2HS diffSub #-}
+  {-# COMPILE AGDA2HS diffSub inline #-}
 
   diffCase : (p : α ⊆ β) → In x β
             → (x ∈ α → a) → (x ∈ diff p → a) → a
   diffCase p = inSplitCase (splitDiff p)
-  {-# COMPILE AGDA2HS diffCase #-}
+  {-# COMPILE AGDA2HS diffCase inline #-}
 
 opaque
   unfolding diff
@@ -49,7 +49,7 @@ opaque
 
 diffCoerce : (p : α ⊆ β) (q : In x α) → diff q ⊆ diff (coerce p q)
 diffCoerce p q = diffSubTrans q p
-{-# COMPILE AGDA2HS diffCoerce #-}
+{-# COMPILE AGDA2HS diffCoerce inline #-}
 
 opaque
   unfolding diff diffSubTrans
