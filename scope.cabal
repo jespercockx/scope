@@ -30,6 +30,6 @@ library
 
     -- other-modules:
     -- other-extensions:
-    build-depends:    base ^>=4.17.0.0
+    build-depends:    base >=4.17.0.0 && < 4.21
     hs-source-dirs:   lib
     default-language: GHC2021
