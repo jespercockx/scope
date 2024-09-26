@@ -1,4 +1,4 @@
-# this package is produced by calling cabal2nix . in the parent directory
+# this package is produced by calling `cabal2nix .`
 # and then doing the following:
 # add an agda2hs argument
 # add buildTools = [agda2hs];

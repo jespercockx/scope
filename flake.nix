@@ -39,5 +39,16 @@
         lib = {
           inherit scope-pkg;
         };
+
+        devShells.default = pkgs.haskellPackages.shellFor {
+          packages = p: with p; [scope-hs];
+          buildInputs = with pkgs.haskellPackages; [
+            cabal-install
+            cabal2nix
+            haskell-language-server
+            agda2hs-custom
+            (pkgs.agda.withPackages [ agda2hs-lib ])
+          ];
+        };
       });
 }

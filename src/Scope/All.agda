@@ -127,12 +127,12 @@ opaque
   unfolding All lookupAll
 
   allLookup : (ls : All p α)
-            → All (λ el → ∃ (el ∈ α × p el) (λ (i , pi) → lookupAll ls i ≡ pi)) α
+            → All (λ el → ∃ (el ∈ α × p el) (λ (i , pri) → lookupAll ls i ≡ pri)) α
   allLookup List.ANil = List.ANil
   allLookup (List.ACons ph ls) =
     List.ACons
       ((inHere , ph) ⟨ lookupHere ls ph ⟩)
-      (mapAll (λ where ((i , pi) ⟨ lp ⟩) → ((inThere i) , pi) ⟨ lookupThere lp ⟩)
+      (mapAll (λ where ((i , pri) ⟨ lp ⟩) → ((inThere i) , pri) ⟨ lookupThere lp ⟩)
               (allLookup ls))
   {-# COMPILE AGDA2HS allLookup #-}
 

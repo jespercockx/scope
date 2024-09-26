@@ -2,7 +2,9 @@ AGDA2HS = agda2hs
 FLAGS =
 LIBRARIES =
 
-.PHONY: app alllib clean clean-lib clean-agdai nix-tc nix-build
+.PHONY: build alllib clean clean-lib clean-agdai nix-tc nix-build
+
+build: cabal-build
 
 alllib: lib lib/Scope.hs lib/Scope/All.hs lib/Scope/Core.hs lib/Scope/Diff.hs lib/Scope/In.hs lib/Scope/Split.hs lib/Scope/Sub.hs
 
