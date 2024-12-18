@@ -46,12 +46,11 @@ opaque
   {-# COMPILE AGDA2HS allJoin #-}
 
 opaque
-  unfolding All Sub Split
+  unfolding All
 
   lookupAll : All p α → x ∈ α → p x
-  lookupAll ps                < EmptyR    > = getAllSingl ps
-  lookupAll (List.ACons px _) < ConsL x _ > = px
-  lookupAll (List.ACons _ ps) < ConsR x q > = lookupAll ps < q >
+  lookupAll (List.ACons pz pzs) (zero ⟨ IsZero refl ⟩) = pz
+  lookupAll (List.ACons _ pzs) (suc n ⟨ IsSuc pn ⟩) = lookupAll pzs (n ⟨ pn ⟩)
   {-# COMPILE AGDA2HS lookupAll #-}
 
   findAll : {q : Set}

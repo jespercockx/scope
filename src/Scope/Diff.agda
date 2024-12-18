@@ -16,7 +16,7 @@ private variable
 opaque
   unfolding Sub
 
-  @0 diff : ∀ {α β : Scope name} → Sub α β → Scope name
+  @0 diff : ∀ {α β : Scope name} → α ⊆ β → Scope name
   diff (⟨ p ⟩ _) = p
 
   diff-left : (p : α ⋈ β ≡ γ) → diff (subLeft p) ≡ β
@@ -33,7 +33,7 @@ opaque
   diffSub p = subRight (splitDiff p)
   {-# COMPILE AGDA2HS diffSub inline #-}
 
-  diffCase : (p : α ⊆ β) → In x β
+  diffCase : (p : α ⊆ β) → x ∈ β
             → (x ∈ α → a) → (x ∈ diff p → a) → a
   diffCase p = inSplitCase (splitDiff p)
   {-# COMPILE AGDA2HS diffCase inline #-}
@@ -47,8 +47,8 @@ opaque
     in  < s >
   {-# COMPILE AGDA2HS diffSubTrans #-}
 
-diffCoerce : (p : α ⊆ β) (q : In x α) → diff q ⊆ diff (coerce p q)
-diffCoerce p q = diffSubTrans q p
+diffCoerce : (p : α ⊆ β) (q : x ∈ α) → diff (inToSub q) ⊆ diff (subTrans (inToSub q) p)
+diffCoerce p q = diffSubTrans (inToSub q) p
 {-# COMPILE AGDA2HS diffCoerce inline #-}
 
 opaque
