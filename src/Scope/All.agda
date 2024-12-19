@@ -49,8 +49,8 @@ opaque
   unfolding All
 
   lookupAll : All p α → x ∈ α → p x
-  lookupAll (List.ACons pz pzs) (zero ⟨ IsZero refl ⟩) = pz
-  lookupAll (List.ACons _ pzs) (suc n ⟨ IsSuc pn ⟩) = lookupAll pzs (n ⟨ pn ⟩)
+  lookupAll (List.ACons pz pzs) (Zero  ⟨ IsZero  refl ⟩) = pz
+  lookupAll (List.ACons _ pzs) (Suc n ⟨ IsSuc pn ⟩) = lookupAll pzs (n ⟨ pn ⟩)
   {-# COMPILE AGDA2HS lookupAll #-}
 
   findAll : {q : Set}
