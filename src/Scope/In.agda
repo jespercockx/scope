@@ -24,7 +24,7 @@ data IsNth (@0 x : name) : @0 Scope name → Nat → Set where
 
 inScope : @0 name → @0 Scope name → Set
 inScope x α = ∃ Nat (λ n → IsNth x α n)
-{-# COMPILE AGDA2HS inScope inline #-}
+{-# COMPILE AGDA2HS inScope #-}
 
 syntax inScope x α = x ∈ α
 
@@ -103,6 +103,7 @@ opaque
   inJoinCase r = inSplitCase (splitRefl r)
   {-# COMPILE AGDA2HS inJoinCase #-}
 
+opaque
   inBindCase : x ∈ (y ◃ α) → (@0 x ≡ y → a) → (x ∈ α → a) → a
   inBindCase {y = y} p f g = inJoinCase (rezz [ y ]) p (λ q → (inSingCase q f)) g
   {-# COMPILE AGDA2HS inBindCase #-}
