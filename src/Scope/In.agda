@@ -18,32 +18,66 @@ private variable
   @0 x y : name
   @0 α β γ : Scope name
 
+data Index : Set where
+  Zero : Index
+  Suc : Index → Index
+{-# COMPILE AGDA2HS Index #-}
+
+
+data IsNth (@0 x : name) : @0 Scope name → Index → Set where
+  IsZero : x ≡ y → IsNth x (y ◃ α) Zero
+  IsSuc : {n : Index} → IsNth x α n → IsNth x (y ◃ α) (Suc n)
+
 In : @0 name → @0 Scope name → Set
-In x α = singleton x ⊆ α
+In x α = ∃ Index (λ n → IsNth x α n)
 {-# COMPILE AGDA2HS In inline #-}
 
 syntax In x α = x ∈ α
 
-coerce : α ⊆ β → x ∈ α → x ∈ β
-coerce p q = subTrans q p
-{-# COMPILE AGDA2HS coerce inline #-}
+inToSub : x ∈ α → [ x ] ⊆ α
+inToSub {x = x} (Zero ⟨ IsZero refl ⟩) = subLeft (splitRefl (rezz [ x ]))
+inToSub (Suc n ⟨ IsSuc p ⟩) = subBindDrop (inToSub (n ⟨ p ⟩))
+{-# COMPILE AGDA2HS inToSub #-}
+
+opaque
+  unfolding Sub Split
+  subToIn : [ x ] ⊆ α → x ∈ α
+  subToIn < EmptyR > = Zero ⟨ IsZero refl ⟩
+  subToIn < ConsL _ _ > = Zero ⟨ IsZero refl ⟩
+  subToIn < ConsR _ p > = do
+    let n ⟨ np ⟩ = subToIn < p >
+    Suc n ⟨ IsSuc np ⟩
+  {-# COMPILE AGDA2HS subToIn #-}
+
+opaque
+  unfolding Sub Split
+  coerce : α ⊆ β → x ∈ α → x ∈ β
+  coerce < EmptyR > p = p
+  coerce < ConsL _ _ > (Zero ⟨ IsZero refl ⟩) = Zero ⟨ IsZero refl ⟩
+  coerce < ConsL _ j > (Suc n ⟨ IsSuc p ⟩) = do
+    let n' ⟨ p' ⟩ = coerce < j > (n ⟨ p ⟩)
+    Suc n' ⟨ IsSuc p' ⟩
+  coerce (⟨ _ ⟩ ConsR _ j) (n ⟨ p ⟩) = do
+    let n' ⟨ p' ⟩ = coerce < j > (n ⟨ p ⟩)
+    Suc n' ⟨ IsSuc p' ⟩
+  {-# COMPILE AGDA2HS coerce #-}
 
 opaque
 
   inHere : x ∈ (x ◃ α)
-  inHere {x = x} = subLeft (splitRefl (rezz [ x ]))
+  inHere = Zero ⟨ IsZero refl ⟩
   {-# COMPILE AGDA2HS inHere #-}
 
   inThere : x ∈ α → x ∈ (y ◃ α)
-  inThere = subBindDrop
+  inThere (n ⟨ p ⟩) = Suc n ⟨ IsSuc p ⟩
   {-# COMPILE AGDA2HS inThere #-}
 
   bindSubToIn : (x ◃ α) ⊆ β → x ∈ β
-  bindSubToIn {x = x} = joinSubLeft (rezz ([ x ]))
+  bindSubToIn s = coerce s inHere
   {-# COMPILE AGDA2HS bindSubToIn #-}
 
 opaque
-  unfolding Split Sub
+  unfolding Split
 
   @0 inEmptyToBot : x ∈ mempty → ⊥
   inEmptyToBot ()
@@ -53,23 +87,19 @@ opaque
   {-# COMPILE AGDA2HS inEmptyCase #-}
 
   inSingCase : x ∈ [ y ] → (@0 x ≡ y → a) → a
-  inSingCase < EmptyR    > f = f refl
-  inSingCase < ConsL _ _ > f = f refl
+  inSingCase (Zero ⟨ IsZero refl ⟩) f = f refl
+  inSingCase (Suc n ⟨ IsSuc () ⟩) f
   {-# COMPILE AGDA2HS inSingCase #-}
 
   inSplitCase : α ⋈ β ≡ γ → x ∈ γ → (x ∈ α → a) → (x ∈ β → a) → a
-  inSplitCase EmptyL      < EmptyR     > f g = g inHere
-  inSplitCase EmptyL      < ConsL x q  > f g = g inHere
-  inSplitCase EmptyL      < ConsR x q  > f g = g (inThere < q >)
-  inSplitCase EmptyR      < EmptyR     > f g = f inHere
-  inSplitCase EmptyR      < ConsL x q  > f g = f inHere
-  inSplitCase EmptyR      < ConsR x q  > f g = f (inThere < q >)
-  inSplitCase (ConsL x p) < EmptyR     > f g = f inHere
-  inSplitCase (ConsL x p) < ConsL .x q > f g = f inHere
-  inSplitCase (ConsL x p) < ConsR .x q > f g = inSplitCase p < q > (f ∘ inThere) g
-  inSplitCase (ConsR x p) < EmptyR     > f g = g inHere
-  inSplitCase (ConsR x p) < ConsL .x q > f g = g inHere
-  inSplitCase (ConsR x p) < ConsR .x q > f g = inSplitCase p < q > f (g ∘ inThere)
+  inSplitCase EmptyL (Zero ⟨ IsZero refl ⟩) f g = g inHere
+  inSplitCase EmptyL (Suc n ⟨ IsSuc p ⟩) f g = g (inThere (n ⟨ p ⟩))
+  inSplitCase EmptyR (Zero ⟨ IsZero refl ⟩) f g = f inHere
+  inSplitCase EmptyR (Suc n ⟨ IsSuc p ⟩) f g = f (inThere (n ⟨ p ⟩))
+  inSplitCase (ConsL _ j) (Zero ⟨ IsZero refl ⟩) f g = f inHere
+  inSplitCase (ConsL _ j) (Suc n ⟨ IsSuc p ⟩) f g = inSplitCase j (n ⟨ p ⟩) (f ∘ inThere) g
+  inSplitCase (ConsR _ j) (Zero ⟨ IsZero refl ⟩) f g = g inHere
+  inSplitCase (ConsR _ j) (Suc n ⟨ IsSuc p ⟩) f g = inSplitCase j (n ⟨ p ⟩) f (g ∘ inThere)
   {-# COMPILE AGDA2HS inSplitCase #-}
 
 opaque
@@ -80,42 +110,30 @@ opaque
   {-# COMPILE AGDA2HS inJoinCase #-}
 
 opaque
-  unfolding Scope Sub
-
   inBindCase : x ∈ (y ◃ α) → (@0 x ≡ y → a) → (x ∈ α → a) → a
   inBindCase {y = y} p f g = inJoinCase (rezz [ y ]) p (λ q → (inSingCase q f)) g
   {-# COMPILE AGDA2HS inBindCase #-}
-
-opaque
-  unfolding Scope Sub
 
   inBindrCase : Rezz α → x ∈ (α ▹ y) → (x ∈ α → a) → (@0 x ≡ y → a) → a
   inBindrCase r p f g = inJoinCase r p f (λ q → inSingCase q g)
   {-# COMPILE AGDA2HS inBindrCase #-}
 
 opaque
-  unfolding Split Sub
+  unfolding Scope
 
   decIn
     : {@0 x y : name} (p : x ∈ α) (q : y ∈ α)
     → Dec (_≡_ {A = Σ0 name (λ n → n ∈ α)} (⟨ x ⟩ p) (⟨ y ⟩ q))
-  decIn < EmptyR    > < EmptyR    > = True  ⟨ refl   ⟩
-  decIn < EmptyR    > < ConsL x q > = False ⟨ (λ ()) ⟩
-  decIn < ConsL x p > < EmptyR    > = False ⟨ (λ ()) ⟩
-  decIn < ConsL x p > < ConsL x q > =
-    case Erased (trans (∅-⋈-injective p) (sym (∅-⋈-injective q))) of λ where
-      (Erased refl) → mapDec (cong (λ r → ⟨ _ ⟩ ⟨ _ ⟩ ConsL x r))
-                        (λ where refl → refl)
-                        (p ⋈-≟ q)
-  decIn < ConsL x p > < ConsR x q > = False ⟨ (λ ()) ⟩
-  decIn < ConsR x p > < ConsL x q > = False ⟨ (λ ()) ⟩
-  decIn < ConsR x p > < ConsR x q > = mapDec aux (λ where refl → refl) (decIn < p > < q >)
+  decIn (Zero ⟨ IsZero refl ⟩) (Zero ⟨ IsZero refl ⟩) = True ⟨ refl ⟩
+  decIn (Zero ⟨ _ ⟩) (Suc m ⟨ _ ⟩) = False ⟨ (λ ()) ⟩
+  decIn (Suc n ⟨ _ ⟩) (Zero ⟨ _ ⟩) = False ⟨ (λ ()) ⟩
+  decIn (Suc n ⟨ IsSuc p ⟩) (Suc m ⟨ IsSuc q ⟩) = mapDec aux (λ where refl → refl) (decIn (n ⟨ p ⟩) (m ⟨ q ⟩))
     where
-      @0 aux : ∀ {@0 x y z α β γ} {p : [ x ] ⋈ α ≡ γ} {q : [ y ] ⋈ β ≡ γ} →
-            _≡_ {A = Σ0 name (λ n → n ∈ γ)} (⟨ x ⟩ ⟨ α ⟩ p) (⟨ y ⟩ ⟨ β ⟩ q) →
-            _≡_ {A = Σ0 name (λ n → n ∈ (Erased z ∷ γ))}
-               (⟨ x ⟩ ⟨ Erased z ∷ α ⟩ ConsR z p)
-               (⟨ y ⟩ ⟨ Erased z ∷ β ⟩ ConsR z q)
+      @0 aux : ∀ {@0 x y z γ n m} {p : IsNth x γ n} {q : IsNth y γ m} →
+            _≡_ {A = Σ0 name (λ w → w ∈ γ)} (⟨ x ⟩ n ⟨ p ⟩) (⟨ y ⟩ m ⟨ q ⟩) →
+            _≡_ {A = Σ0 name (λ w → w ∈ (Erased z ∷ γ))}
+               (⟨ x ⟩ Suc n ⟨ IsSuc p ⟩)
+               (⟨ y ⟩ Suc m ⟨ IsSuc q ⟩)
       aux refl = refl
   {-# COMPILE AGDA2HS decIn #-}
 
