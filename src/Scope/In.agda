@@ -21,7 +21,7 @@ private variable
 data Index : Set where
   Zero : Index
   Suc : Index → Index
-{-# COMPILE AGDA2HS Index #-}
+{-# COMPILE AGDA2HS Index deriving Show #-}
 
 
 data IsNth (@0 x : name) : @0 Scope name → Index → Set where

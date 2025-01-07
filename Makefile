@@ -6,7 +6,7 @@ LIBRARIES =
 
 build: cabal-build
 
-alllib: lib lib/Scope.hs lib/Scope/All.hs lib/Scope/Core.hs lib/Scope/Diff.hs lib/Scope/In.hs lib/Scope/Split.hs lib/Scope/Sub.hs
+alllib: lib lib/Scope.hs lib/Scope/All.hs lib/Scope/Core.hs lib/Scope/Diff.hs lib/Scope/In.hs lib/Scope/Split.hs lib/Scope/Sub.hs lib/Scope/Cut.hs
 
 # alllib: lib lib/*.hs
 
