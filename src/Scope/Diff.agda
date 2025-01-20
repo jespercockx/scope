@@ -19,6 +19,11 @@ opaque
   @0 diff : ∀ {α β : Scope name} → α ⊆ β → Scope name
   diff (⟨ p ⟩ _) = p
 
+  @0 diffVar : ∀ {α : Scope name} → x ∈ α → Scope name
+  diffVar xp = diff (inToSub xp)
+
+  syntax diffVar {α = α} xp = α \[ xp ]
+
   diff-left : (p : α ⋈ β ≡ γ) → diff (subLeft p) ≡ β
   diff-left p = refl
 
