@@ -47,7 +47,7 @@ Renaming α β = NameIn α → NameIn β
 {-# COMPILE AGDA2HS Renaming inline #-}
 
 opaque
-  unfolding Scope
+  unfolding Scope diff
   permutationToRenaming : ∀ {@0 α β : Scope name} → Permutation α β → Renaming α β
   permutationToRenaming ⌈⌉ = id
   permutationToRenaming ⌈ xVar ◃ _ ⌉ (⟨ _ ⟩ (Zero ⟨ IsZero refl ⟩)) = xVar
