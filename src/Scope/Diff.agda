@@ -38,6 +38,16 @@ opaque
   diffCase p = inSplitCase (splitDiff p)
   {-# COMPILE AGDA2HS diffCase inline #-}
 
+@0 diffVar : ∀ {α : Scope name} → x ∈ α → Scope name
+diffVar xp = diff (inToSub xp)
+
+infix 10 diffVar
+syntax diffVar {α = α} xp = α \[ xp ]
+
+diffVarCase : (xp : x ∈ α) → (yp : y ∈ α)
+              → (@0 x ≡ y → a) → (x ∈ α \[ yp ] → a) → a
+diffVarCase xp yp ce cd = diffCase (inToSub yp) xp (λ p → inSingCase p ce) cd
+
 opaque
   unfolding diff
 

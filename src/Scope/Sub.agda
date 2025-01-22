@@ -30,7 +30,7 @@ opaque
 
   subRight : α ⋈ β ≡ γ → β ⊆ γ
   subRight p = < splitComm p >
-  {-# COMPILE AGDA2HS subRight inline #-}
+  {-# COMPILE AGDA2HS subRight #-}
 
   subWeaken : α ⊆ β → α ⊆ (bind x β)
   subWeaken < p > = < splitBindRight p >
