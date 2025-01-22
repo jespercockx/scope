@@ -32,6 +32,7 @@ In : @0 name → @0 Scope name → Set
 In x α = ∃ Index (λ n → IsNth x α n)
 {-# COMPILE AGDA2HS In inline #-}
 
+infix 6 In
 syntax In x α = x ∈ α
 
 inToSub : x ∈ α → [ x ] ⊆ α

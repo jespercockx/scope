@@ -19,11 +19,6 @@ opaque
   @0 diff : ∀ {α β : Scope name} → α ⊆ β → Scope name
   diff (⟨ p ⟩ _) = p
 
-  @0 diffVar : ∀ {α : Scope name} → x ∈ α → Scope name
-  diffVar xp = diff (inToSub xp)
-
-  syntax diffVar {α = α} xp = α \[ xp ]
-
   diff-left : (p : α ⋈ β ≡ γ) → diff (subLeft p) ≡ β
   diff-left p = refl
 
@@ -42,6 +37,16 @@ opaque
             → (x ∈ α → a) → (x ∈ diff p → a) → a
   diffCase p = inSplitCase (splitDiff p)
   {-# COMPILE AGDA2HS diffCase inline #-}
+
+@0 diffVar : ∀ {α : Scope name} → x ∈ α → Scope name
+diffVar xp = diff (inToSub xp)
+
+infix 10 diffVar
+syntax diffVar {α = α} xp = α \[ xp ]
+
+diffVarCase : (xp : x ∈ α) → (yp : y ∈ α)
+              → (@0 x ≡ y → a) → (x ∈ α \[ yp ] → a) → a
+diffVarCase xp yp ce cd = diffCase (inToSub yp) xp (λ p → inSingCase p ce) cd
 
 opaque
   unfolding diff
