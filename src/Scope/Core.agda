@@ -50,6 +50,11 @@ instance
   Monoid.mappend iMonoidScope = scopeMappend
   Monoid.mconcat iMonoidScope = scopeMConcat
 
+data RScope (@0 name : Set) : Set where
+  Nil : RScope name
+  Cons : (@0 x : name) (s : RScope name) → RScope name
+{-# COMPILE AGDA2HS RScope #-}
+
 opaque
   unfolding Scope
   instance
@@ -73,6 +78,10 @@ bindr α x = α <> [ x ]
 infixr 5 bindr
 syntax bindr α x = α ▹ x
 
+extScope : Scope name → RScope name → Scope name
+extScope s Nil = s
+extScope α (Cons x rs) = extScope (x ◃ α) rs
+{-# COMPILE AGDA2HS extScope #-}
 
 opaque
   unfolding Scope
