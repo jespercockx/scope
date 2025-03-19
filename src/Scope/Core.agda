@@ -55,6 +55,8 @@ data RScope (@0 name : Set) : Set where
   Cons : (@0 x : name) (s : RScope name) → RScope name
 {-# COMPILE AGDA2HS RScope #-}
 
+syntax Cons x s = x ◂ s
+
 opaque
   unfolding Scope
   instance
@@ -80,7 +82,7 @@ syntax bindr α x = α ▹ x
 
 extScope : Scope name → RScope name → Scope name
 extScope s Nil = s
-extScope α (Cons x rs) = extScope (x ◃ α) rs
+extScope α (x ◂ rs) = extScope (x ◃ α) rs
 {-# COMPILE AGDA2HS extScope #-}
 
 opaque
