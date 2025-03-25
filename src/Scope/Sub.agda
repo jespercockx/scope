@@ -102,6 +102,15 @@ opaque
   {-# COMPILE AGDA2HS joinSubRight #-}
 
 opaque
+  unfolding Sub Split
+  subExtScopeKeep : {@0 rγ : RScope name} → Rezz rγ → α ⊆ β → (extScope α rγ) ⊆ (extScope β rγ)
+  subExtScopeKeep (rezz Nil) s = s
+  subExtScopeKeep (rezz (x ◂ rγ)) (⟨ δ ⟩ s) = subExtScopeKeep (rezz rγ) (⟨ δ ⟩ (ConsL x s))
+
+  subExtScope : {@0 rγ : RScope name} → Rezz rγ → α ⊆ β → α ⊆ (extScope β rγ)
+  subExtScope (rezz Nil) s = s
+  subExtScope (rezz (x ◂ rγ)) (⟨ δ ⟩ s) = subExtScope (rezz rγ) (⟨ x ◃ δ ⟩ (ConsR x s))
+opaque
   unfolding Sub subBindKeep joinSubLeft
   SubThings : Set₁
   SubThings = Set

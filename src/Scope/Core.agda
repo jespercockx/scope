@@ -55,7 +55,11 @@ data RScope (@0 name : Set) : Set where
   Cons : (@0 x : name) (s : RScope name) → RScope name
 {-# COMPILE AGDA2HS RScope #-}
 
-syntax Cons x s = x ◂ s
+pattern _◂_ x s = Cons x s
+
+concatRScope : (rα rβ : RScope name) → RScope name
+concatRScope Nil rβ = rβ
+concatRScope (x ◂ rα) rβ = x ◂ (concatRScope rα rβ)
 
 opaque
   unfolding Scope
@@ -84,6 +88,45 @@ extScope : Scope name → RScope name → Scope name
 extScope s Nil = s
 extScope α (x ◂ rs) = extScope (x ◃ α) rs
 {-# COMPILE AGDA2HS extScope #-}
+
+opaque
+  unfolding Scope
+  extRScope : Scope name → RScope name → RScope name
+  extRScope [] rs = rs
+  extRScope (Erased x ∷ α) rs = extRScope α (x ◂ rs)
+{-# COMPILE AGDA2HS extRScope #-}
+
+opaque
+  unfolding Scope iLawfulMonoidScope
+
+  @0 extScopeBind : (@0 α : Scope name) (@0 y : name) (@0 rγ : RScope name) → (extScope (y ◃ α) rγ) ≡ (extScope [ y ] rγ) <> α
+  extScopeBind  α y Nil = refl
+  extScopeBind  α y (z ◂ rγ) =
+    let e₀ : (extScope (y ◃ α) (z ◂ rγ)) ≡ (extScope [ z ] rγ) <> (y ◃ α)
+        e₀ = extScopeBind (y ◃ α) z rγ
+        e₁ : (extScope [ z ] rγ) <> ([ y ] <>  α) ≡ ((extScope [ z ] rγ) <> [ y ]) <> α
+        e₁ = associativity _ [ y ] α
+        e₂ : (extScope (z ◃ [ y ]) rγ) ≡ (extScope [ z ] rγ) <> [ y ]
+        e₂ = extScopeBind [ y ] z rγ
+    in
+    trans (trans e₀ e₁) (sym (cong (λ δ → δ <> α) e₂))
+
+  @0 extScopeConcatEmpty : (@0 α : Scope name) (@0 rγ : RScope name) → (extScope α rγ) ≡ (extScope mempty rγ) <> α
+  extScopeConcatEmpty  α Nil = refl
+  extScopeConcatEmpty α (z ◂ rγ) = extScopeBind α z rγ
+
+  @0 extScopeConcat : (@0 α β : Scope name) (@0 rγ : RScope name) → (extScope (β <> α) rγ) ≡ (extScope β rγ) <> α
+  extScopeConcat α [] rγ =
+    extScopeConcatEmpty α rγ
+  extScopeConcat α (Erased y ∷ β) rγ =
+    extScopeConcat α β (y ◂ rγ)
+
+
+rezzExtScope : {@0 α : Scope name} {@0 rβ : RScope name}
+  → Rezz α → Rezz rβ → Rezz (extScope α rβ)
+rezzExtScope αRun (rezz Nil) = αRun
+rezzExtScope (rezz α) (rezz (x ◂ rβ)) = rezzExtScope (rezz (x ◃ α)) (rezz rβ)
+{-# COMPILE AGDA2HS rezzExtScope #-}
 
 opaque
   unfolding Scope
