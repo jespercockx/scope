@@ -4,12 +4,8 @@ module Scope.Core where
 open import Haskell.Prelude hiding (All; _∘_)
 
 open import Haskell.Law.Semigroup.Def using (IsLawfulSemigroup; associativity)
-open import Haskell.Law.Semigroup.List using (iLawfulSemigroupList)
-open import Haskell.Law.Monoid.Def
-open import Haskell.Law.Monoid.List using (iLawfulMonoidList)
-open import Haskell.Law.Equality
+open import Haskell.Law.Monoid.Def using (IsLawfulMonoid; rightIdentity; leftIdentity; concatenation)
 open import Haskell.Extra.Erase
-open import Haskell.Extra.Dec as Dec
 
 open import Utils.Tactics
 import Utils.List as List
@@ -17,142 +13,222 @@ import Utils.List as List
 private variable
   @0 name : Set
 
-opaque
-  Scope : (@0 name : Set) → Set
-  Scope name = List (Erase name)
-  {-# COMPILE AGDA2HS Scope #-}
+---------------------------------------------------------------------------------------------------
+                                     {- PART ONE : Scope -}
+---------------------------------------------------------------------------------------------------
+module DefScope where
+  open import Haskell.Law.List
 
-  singleton : @0 name → Scope name
-  singleton x = Erased x ∷ []
-  {-# COMPILE AGDA2HS singleton #-}
+  opaque
+    Scope : (@0 name : Set) → Set
+    Scope name = List (Erase name)
+    {-# COMPILE AGDA2HS Scope #-}
 
-  syntax singleton x = [ x ]
+    singleton : @0 name → Scope name
+    singleton x = Erased x ∷ []
+    {-# COMPILE AGDA2HS singleton #-}
+
+    syntax singleton x = [ x ]
+
+    instance
+      iSemigroupScope : Semigroup (Scope name)
+      iSemigroupScope ._<>_ α β = β ++ α
+
+    private
+      -- we do this to get a transparent super field in the monoid instance
+      scopeMempty : Scope name
+      scopeMempty = mempty
+
+      scopeMappend : Scope name → Scope name → Scope name
+      scopeMappend α β = mappend β α
+
+      scopeMConcat : List (Scope name) → Scope name
+      scopeMConcat [] = mempty
+      scopeMConcat (x ∷ xs) = (scopeMConcat xs) ++ x
 
   instance
-    iSemigroupScope : Semigroup (Scope name)
-    iSemigroupScope = iSemigroupList
+    iMonoidScope : Monoid (Scope name)
+    Monoid.super iMonoidScope = iSemigroupScope
+    Monoid.mempty iMonoidScope = scopeMempty
+    Monoid.mappend iMonoidScope = scopeMappend
+    Monoid.mconcat iMonoidScope = scopeMConcat
 
-  private
-    -- we do this to get a transparent super field in the monoid instance
-    scopeMempty : Scope name
-    scopeMempty = mempty
+  opaque
+    unfolding Scope
+    instance
+      iLawfulSemigroupScope : IsLawfulSemigroup (Scope name)
+      iLawfulSemigroupScope .associativity _       _  []  = refl
+      iLawfulSemigroupScope .associativity xs ys (z ∷ zs)
+        rewrite (++-assoc zs ys xs)
+        = refl
 
-    scopeMappend : Scope name → Scope name → Scope name
-    scopeMappend = mappend
+      iLawfulMonoidScope : IsLawfulMonoid (Scope name)
+      iLawfulMonoidScope .rightIdentity [] = refl
+      iLawfulMonoidScope .rightIdentity (x ∷ xs)
+        rewrite ++-[] (x ∷ xs)
+        = refl
 
-    scopeMConcat : List (Scope name) → Scope name
-    scopeMConcat = mconcat
+      iLawfulMonoidScope .leftIdentity [] = refl
+      iLawfulMonoidScope .leftIdentity (x ∷ xs)
+        rewrite ++-[] (x ∷ xs)
+        = refl
 
-instance
-  iMonoidScope : Monoid (Scope name)
-  Monoid.super iMonoidScope = iSemigroupScope
-  Monoid.mempty iMonoidScope = scopeMempty
-  Monoid.mappend iMonoidScope = scopeMappend
-  Monoid.mconcat iMonoidScope = scopeMConcat
+      iLawfulMonoidScope .concatenation [] = refl
+      iLawfulMonoidScope .concatenation (x ∷ xs)
+        rewrite ++-[] (x ∷ xs)
+          | concatenation ⦃ iMonoidA = iMonoidScope ⦄ xs
+        = refl
 
-data RScope (@0 name : Set) : Set where
-  Nil : RScope name
-  Cons : (@0 x : name) (s : RScope name) → RScope name
-{-# COMPILE AGDA2HS RScope #-}
+  bind : Scope name → @0 name  → Scope name
+  bind α x = α <> [ x ]
+  {-# COMPILE AGDA2HS bind #-}
 
-pattern _◂_ x s = Cons x s
+  infixr 5 bind
+  syntax bind α x = α ▸ x
 
-concatRScope : (rα rβ : RScope name) → RScope name
-concatRScope Nil rβ = rβ
-concatRScope (x ◂ rα) rβ = x ◂ (concatRScope rα rβ)
+{- end of module DefScope -}
+open DefScope public
 
-opaque
-  unfolding Scope
+-- bindr : Scope name → @0 name → Scope name
+-- bindr α x = α <> [ x ]
+-- {-# COMPILE AGDA2HS bindr #-}
+
+-- infixr 5 bindr
+-- syntax bindr α x = α ▹ x
+
+---------------------------------------------------------------------------------------------------
+                                    {- PART TWO : RScope -}
+---------------------------------------------------------------------------------------------------
+module DefRScope where
+  open import Haskell.Law.Monoid.List using (iLawfulMonoidList)
+  open import Haskell.Law.Semigroup.List using (iLawfulSemigroupList)
+
+  opaque
+    RScope : (@0 name : Set) → Set
+    RScope name = List (Erase name)
+    {-# COMPILE AGDA2HS RScope #-}
+
+    rsingleton : @0 name → RScope name
+    rsingleton x = Erased x ∷ []
+    {-# COMPILE AGDA2HS rsingleton #-}
+
+    syntax rsingleton x = [ x ◂]
+
+    instance
+      iSemigroupRScope : Semigroup (RScope name)
+      iSemigroupRScope ._<>_ = _++_
+
+    private
+      -- we do this to get a transparent super field in the monoid instance
+      rscopeMempty : RScope name
+      rscopeMempty = mempty
+
+      rscopeMappend : RScope name → RScope name → RScope name
+      rscopeMappend = mappend
+
+      rscopeMConcat : List (RScope name) → RScope name
+      rscopeMConcat = mconcat
+
   instance
-    iLawfulSemigroupScope : IsLawfulSemigroup (Scope name)
-    iLawfulSemigroupScope = iLawfulSemigroupList
+    iMonoidRScope : Monoid (RScope name)
+    Monoid.super iMonoidRScope = iSemigroupRScope
+    Monoid.mempty iMonoidRScope = rscopeMempty
+    Monoid.mappend iMonoidRScope = rscopeMappend
+    Monoid.mconcat iMonoidRScope = rscopeMConcat
 
-    iLawfulMonoidScope : IsLawfulMonoid (Scope name)
-    iLawfulMonoidScope = iLawfulMonoidList
+  opaque
+    unfolding RScope
+    instance
+      iLawfulSemigroupRScope : IsLawfulSemigroup (RScope name)
+      iLawfulSemigroupRScope = iLawfulSemigroupList
 
-bind : @0 name → Scope name → Scope name
-bind x α = singleton x <> α
-{-# COMPILE AGDA2HS bind #-}
+      iLawfulMonoidRScope : IsLawfulMonoid (RScope name)
+      iLawfulMonoidRScope = iLawfulMonoidList
 
-infixr 5 bind
-syntax bind x α = x ◃ α
+  rbind : RScope name → @0 name  → RScope name
+  rbind α x = [ x ◂] <> α
+  {-# COMPILE AGDA2HS rbind #-}
 
-bindr : Scope name → @0 name → Scope name
-bindr α x = α <> [ x ]
-{-# COMPILE AGDA2HS bindr #-}
+  infixr 5 rbind
+  syntax rbind α x = x ◂ α
 
-infixr 5 bindr
-syntax bindr α x = α ▹ x
+{- end of module DefRScope -}
+open DefRScope public
 
-extScope : Scope name → RScope name → Scope name
-extScope s Nil = s
-extScope α (x ◂ rs) = extScope (x ◃ α) rs
-{-# COMPILE AGDA2HS extScope #-}
+---------------------------------------------------------------------------------------------------
+                                {- PART THREE : Combinations -}
+---------------------------------------------------------------------------------------------------
+module Combinations where
+  open import Haskell.Law.Equality
 
-opaque
-  unfolding Scope
-  extRScope : Scope name → RScope name → RScope name
-  extRScope [] rs = rs
-  extRScope (Erased x ∷ α) rs = extRScope α (x ◂ rs)
-{-# COMPILE AGDA2HS extRScope #-}
+  opaque
+    unfolding RScope
 
-opaque
-  unfolding Scope iLawfulMonoidScope
+    extScope : Scope name → RScope name → Scope name
+    extScope s [] = s
+    extScope α (Erased x ∷ rs) = extScope (α ▸ x) rs
+    {-# COMPILE AGDA2HS extScope #-}
 
-  @0 extScopeBind : (@0 α : Scope name) (@0 y : name) (@0 rγ : RScope name) → (extScope (y ◃ α) rγ) ≡ (extScope [ y ] rγ) <> α
-  extScopeBind  α y Nil = refl
-  extScopeBind  α y (z ◂ rγ) =
-    let e₀ : (extScope (y ◃ α) (z ◂ rγ)) ≡ (extScope [ z ] rγ) <> (y ◃ α)
-        e₀ = extScopeBind (y ◃ α) z rγ
-        e₁ : (extScope [ z ] rγ) <> ([ y ] <>  α) ≡ ((extScope [ z ] rγ) <> [ y ]) <> α
-        e₁ = associativity _ [ y ] α
-        e₂ : (extScope (z ◃ [ y ]) rγ) ≡ (extScope [ z ] rγ) <> [ y ]
-        e₂ = extScopeBind [ y ] z rγ
-    in
-    trans (trans e₀ e₁) (sym (cong (λ δ → δ <> α) e₂))
+    @0 extScopeBind : (@0 α : Scope name) (@0 y : name) (@0 rγ : RScope name) → (extScope (α ▸ y) rγ) ≡ α <> (extScope [ y ] rγ)
+    extScopeBind  α y [] = refl
+    extScopeBind  α y (Erased z ∷ rγ) =
+      let e₀ : (extScope (α ▸ y) (z ◂ rγ)) ≡ (α ▸ y) <> (extScope [ z ] rγ)
+          e₀ = extScopeBind (α ▸ y) z rγ
+          e₁ : (α <> [ y ]) <> (extScope [ z ] rγ) ≡  α <> ([ y ] <> (extScope [ z ] rγ))
+          e₁ = sym (associativity α [ y ] (extScope [ z ] rγ))
+          e₂ : (extScope ([ y ] ▸ z) rγ) ≡ [ y ] <> (extScope [ z ] rγ)
+          e₂ = extScopeBind [ y ] z rγ
+      in
+      trans (trans e₀ e₁) (sym (cong (λ δ → α <> δ) e₂))
 
-  @0 extScopeConcatEmpty : (@0 α : Scope name) (@0 rγ : RScope name) → (extScope α rγ) ≡ (extScope mempty rγ) <> α
-  extScopeConcatEmpty  α Nil = refl
-  extScopeConcatEmpty α (z ◂ rγ) = extScopeBind α z rγ
+  opaque
+    unfolding Scope extScope
+    @0 extScopeConcatEmpty : (@0 α : Scope name) (@0 rγ : RScope name) → (extScope α rγ) ≡ α <> (extScope mempty rγ)
+    extScopeConcatEmpty  α [] = refl
+    extScopeConcatEmpty α (Erased z ∷ rγ) = extScopeBind α z rγ
 
-  @0 extScopeConcat : (@0 α β : Scope name) (@0 rγ : RScope name) → (extScope (β <> α) rγ) ≡ (extScope β rγ) <> α
-  extScopeConcat α [] rγ =
-    extScopeConcatEmpty α rγ
-  extScopeConcat α (Erased y ∷ β) rγ =
-    extScopeConcat α β (y ◂ rγ)
+    @0 extScopeConcat : (@0 α β : Scope name) (@0 rγ : RScope name) → (extScope (α <> β) rγ) ≡ α <> (extScope β rγ)
+    extScopeConcat α [] rγ =
+      extScopeConcatEmpty α rγ
+    extScopeConcat α (Erased y ∷ β) rγ =
+      extScopeConcat α β (y ◂ rγ)
 
+  opaque
+    unfolding extScope
+    rezzExtScope : {@0 α : Scope name} {@0 rβ : RScope name}
+      → Rezz α → Rezz rβ → Rezz (extScope α rβ)
+    rezzExtScope αRun (rezz []) = αRun
+    rezzExtScope (rezz α) (rezz (Erased x ∷ rβ)) = rezzExtScope (rezz (α ▸ x)) (rezz rβ)
+    {-# COMPILE AGDA2HS rezzExtScope #-}
 
-rezzExtScope : {@0 α : Scope name} {@0 rβ : RScope name}
-  → Rezz α → Rezz rβ → Rezz (extScope α rβ)
-rezzExtScope αRun (rezz Nil) = αRun
-rezzExtScope (rezz α) (rezz (x ◂ rβ)) = rezzExtScope (rezz (x ◃ α)) (rezz rβ)
-{-# COMPILE AGDA2HS rezzExtScope #-}
+{- end of module Combinations -}
+open Combinations public
+
 
 opaque
   unfolding Scope
 
   caseScope : (α : Scope name)
             → (@0 {{α ≡ mempty}} → c)
-            → ((@0 x : name) (β : Scope name) → @0 {{α ≡ x ◃ β}} → c)
+            → ((@0 x : name) (β : Scope name) → @0 {{α ≡ β ▸ x}} → c)
             → c
   caseScope [] emptyCase bindCase = emptyCase
   caseScope (Erased x ∷ β) emptyCase bindCase = bindCase x β
   {-# COMPILE AGDA2HS caseScope #-}
 
 opaque
-  unfolding Scope iLawfulSemigroupScope iLawfulMonoidScope
-
+  unfolding Scope
   rezzBind
     : {@0 α : Scope name} {@0 x : name}
-    → Rezz α → Rezz (bind x α)
+    → Rezz α → Rezz (bind α x)
   rezzBind = rezzCong2 _∷_ rezzErase
   {-# COMPILE AGDA2HS rezzBind #-}
 
-  rezzUnbind : {@0 x : name} {@0 α : Scope name} → Rezz (x ◃ α) → Rezz α
+  rezzUnbind : {@0 x : name} {@0 α : Scope name} → Rezz (α ▸ x) → Rezz α
   rezzUnbind = rezzTail
   {-# COMPILE AGDA2HS rezzUnbind #-}
 
 opaque
-  unfolding Scope iLawfulMonoidScope caseScope rezzBind
+  unfolding Scope iLawfulMonoidScope RScope iLawfulMonoidRScope extScope extScopeConcatEmpty rezzExtScope caseScope rezzBind
   ScopeCoreThings : Set₁
   ScopeCoreThings = Set
