@@ -18,7 +18,7 @@ private variable
 opaque
   unfolding Scope
   @0 cut : {α : Scope name} → x ∈ α → Scope name × Scope name
-  cut {α = _ ∷ α'} (Zero  ⟨ p ⟩) = α' , mempty
+  cut {α = _ ∷ α'} (Zero  ⟨ p ⟩) = α' , []
   cut {α = iErased ∷ α} (Suc n ⟨ IsSuc p ⟩) = do
     let α₀ , α₁ = cut (n ⟨ p ⟩)
     α₀ , iErased ∷ α₁
@@ -34,12 +34,12 @@ cutTake x = snd (cut x)
 
 opaque
   unfolding cut Split Scope
-  @0 cutEq : (xp : x ∈ α) → cutTake xp <> (x ◃ cutDrop xp) ≡ α
+  @0 cutEq : (xp : x ∈ α) → ((cutDrop xp) ▸ x) <> (cutTake xp) ≡ α
   cutEq {α = iErased ∷ α'} (Zero  ⟨ IsZero  refl ⟩) = refl
   cutEq {α = iErased ∷ α'} (Suc n ⟨ IsSuc p ⟩) = cong (λ α → iErased ∷ α ) (cutEq (n ⟨ p ⟩))
 
   {- cutSplit without unfolding use SplitRefl and therefore needs Rezz α -}
-  cutSplit : (xp : x ∈ α) → cutTake xp ⋈ (x ◃ cutDrop xp) ≡ α
+  cutSplit : (xp : x ∈ α) → cutTake xp ⋈ ((cutDrop xp) ▸ x) ≡ α
   cutSplit (Zero  ⟨ IsZero  refl ⟩) = EmptyL
   cutSplit (Suc n ⟨ IsSuc p ⟩) = ConsL _ (cutSplit (n ⟨ p ⟩))
   {-# COMPILE AGDA2HS cutSplit #-}
@@ -53,10 +53,10 @@ rezzCutTake αRun =  rezzSplitLeft (cutSplit _) αRun
 {-# COMPILE AGDA2HS rezzCutTake inline #-}
 
 
-subCut :  {xp : x ∈ α} → Rezz α → (cutTake xp <> cutDrop xp) ⊆ α
+subCut :  {xp : x ∈ α} → Rezz α → (cutDrop xp <> cutTake xp) ⊆ α
 subCut {xp = xp} αRun =
-  subst0 (λ α' → (cutTake xp <> cutDrop xp) ⊆ α')
-    (cutEq xp) (subJoin (rezzCutTake αRun) subRefl (subBindDrop subRefl))
+  subst0 (λ α' → (cutDrop xp <> cutTake xp) ⊆ α')
+    (cutEq xp) (subJoin (rezzCutTake αRun)  (subBindDrop subRefl) subRefl)
 {-# COMPILE AGDA2HS subCut inline #-}
 
 subCutDrop :  {xp : x ∈ α} →  cutDrop xp ⊆ α

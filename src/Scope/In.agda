@@ -26,8 +26,8 @@ data Index : Set where
 
 
 data IsNth (@0 x : name) : @0 Scope name → Index → Set where
-  IsZero : x ≡ y → IsNth x (y ◃ α) Zero
-  IsSuc : {n : Index} → IsNth x α n → IsNth x (y ◃ α) (Suc n)
+  IsZero : x ≡ y → IsNth x (α ▸ y) Zero
+  IsSuc : {n : Index} → IsNth x α n → IsNth x (α ▸ y) (Suc n)
 
 In : @0 name → @0 Scope name → Set
 In x α = ∃ Index (λ n → IsNth x α n)
@@ -37,7 +37,7 @@ infix 6 In
 syntax In x α = x ∈ α
 
 inToSub : x ∈ α → [ x ] ⊆ α
-inToSub {x = x} (Zero ⟨ IsZero refl ⟩) = subLeft (splitRefl (rezz [ x ]))
+inToSub {x = x} (Zero ⟨ IsZero refl ⟩) = subRight (splitRefl (rezz [ x ]))
 inToSub (Suc n ⟨ IsSuc p ⟩) = subBindDrop (inToSub (n ⟨ p ⟩))
 {-# COMPILE AGDA2HS inToSub #-}
 
@@ -66,15 +66,15 @@ opaque
 
 opaque
 
-  inHere : x ∈ (x ◃ α)
+  inHere : x ∈ (α ▸ x)
   inHere = Zero ⟨ IsZero refl ⟩
   {-# COMPILE AGDA2HS inHere #-}
 
-  inThere : x ∈ α → x ∈ (y ◃ α)
+  inThere : x ∈ α → x ∈ (α ▸ y)
   inThere (n ⟨ p ⟩) = Suc n ⟨ IsSuc p ⟩
   {-# COMPILE AGDA2HS inThere #-}
 
-  bindSubToIn : (x ◃ α) ⊆ β → x ∈ β
+  bindSubToIn : (α ▸ x) ⊆ β → x ∈ β
   bindSubToIn s = coerce s inHere
   {-# COMPILE AGDA2HS bindSubToIn #-}
 
@@ -106,19 +106,19 @@ opaque
 
 opaque
   inJoinCase
-    : Rezz α
+    : Rezz β
     → x ∈ (α <> β) → (x ∈ α → a) → (x ∈ β → a) → a
   inJoinCase r = inSplitCase (splitRefl r)
   {-# COMPILE AGDA2HS inJoinCase #-}
 
 opaque
-  inBindCase : x ∈ (y ◃ α) → (@0 x ≡ y → a) → (x ∈ α → a) → a
-  inBindCase {y = y} p f g = inJoinCase (rezz [ y ]) p (λ q → (inSingCase q f)) g
+  inBindCase : x ∈ (α ▸ y) → (x ∈ α → a) → (@0 x ≡ y → a) → a
+  inBindCase {α = α} {y = y} p g f = inJoinCase (rezz ([ y ])) p g ((λ q → (inSingCase q f)))
   {-# COMPILE AGDA2HS inBindCase #-}
 
-  inBindrCase : Rezz α → x ∈ (α ▹ y) → (x ∈ α → a) → (@0 x ≡ y → a) → a
-  inBindrCase r p f g = inJoinCase r p f (λ q → inSingCase q g)
-  {-# COMPILE AGDA2HS inBindrCase #-}
+  -- inBindrCase : Rezz α → x ∈ (α ▹ y) → (x ∈ α → a) → (@0 x ≡ y → a) → a
+  -- inBindrCase r p f g = inJoinCase r p f (λ q → inSingCase q g)
+  -- {-# COMPILE AGDA2HS inBindrCase #-}
 
 inScopeInExtScope : Rezz rβ → x ∈ α → x ∈ (extScope α rβ)
 inScopeInExtScope r = coerce (subExtScope r subRefl)
@@ -143,6 +143,6 @@ opaque
   {-# COMPILE AGDA2HS decIn #-}
 
 opaque
-  unfolding inHere inEmptyCase inJoinCase inBindCase inBindrCase decIn
+  unfolding subToIn coerce inHere inEmptyCase inJoinCase inBindCase decIn
   InThings : Set₁
   InThings = Set
