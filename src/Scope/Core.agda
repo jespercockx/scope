@@ -145,12 +145,12 @@ module DefRScope where
       iLawfulMonoidRScope : IsLawfulMonoid (RScope name)
       iLawfulMonoidRScope = iLawfulMonoidList
 
-  rbind : RScope name → @0 name  → RScope name
-  rbind α x = [ x ◂] <> α
+  rbind : @0 name → RScope name → RScope name
+  rbind x α = [ x ◂] <> α
   {-# COMPILE AGDA2HS rbind #-}
 
   infixr 5 rbind
-  syntax rbind α x = x ◂ α
+  syntax rbind x α = x ◂ α
 
 {- end of module DefRScope -}
 open DefRScope public
@@ -169,15 +169,21 @@ module Combinations where
     extScope α (Erased x ∷ rs) = extScope (α ▸ x) rs
     {-# COMPILE AGDA2HS extScope #-}
 
-    @0 extScopeBind : (@0 α : Scope name) (@0 y : name) (@0 rγ : RScope name) → (extScope (α ▸ y) rγ) ≡ α <> (extScope [ y ] rγ)
-    extScopeBind  α y [] = refl
-    extScopeBind  α y (Erased z ∷ rγ) =
+    extScopeEmpty : {α : Scope name} → (extScope α mempty) ≡ α
+    extScopeEmpty = refl
+
+    extScopeBind : {α : Scope name} {y : name} {rγ : RScope name} → extScope α (y ◂ rγ) ≡ extScope (α ▸ y) rγ
+    extScopeBind = refl
+
+    @0 extScopeConcatBind : (@0 α : Scope name) (@0 y : name) (@0 rγ : RScope name) → (extScope (α ▸ y) rγ) ≡ α <> (extScope [ y ] rγ)
+    extScopeConcatBind  α y [] = refl
+    extScopeConcatBind  α y (Erased z ∷ rγ) =
       let e₀ : (extScope (α ▸ y) (z ◂ rγ)) ≡ (α ▸ y) <> (extScope [ z ] rγ)
-          e₀ = extScopeBind (α ▸ y) z rγ
+          e₀ = extScopeConcatBind (α ▸ y) z rγ
           e₁ : (α <> [ y ]) <> (extScope [ z ] rγ) ≡  α <> ([ y ] <> (extScope [ z ] rγ))
           e₁ = sym (associativity α [ y ] (extScope [ z ] rγ))
           e₂ : (extScope ([ y ] ▸ z) rγ) ≡ [ y ] <> (extScope [ z ] rγ)
-          e₂ = extScopeBind [ y ] z rγ
+          e₂ = extScopeConcatBind [ y ] z rγ
       in
       trans (trans e₀ e₁) (sym (cong (λ δ → α <> δ) e₂))
 
@@ -185,7 +191,7 @@ module Combinations where
     unfolding Scope extScope
     @0 extScopeConcatEmpty : (@0 α : Scope name) (@0 rγ : RScope name) → (extScope α rγ) ≡ α <> (extScope mempty rγ)
     extScopeConcatEmpty  α [] = refl
-    extScopeConcatEmpty α (Erased z ∷ rγ) = extScopeBind α z rγ
+    extScopeConcatEmpty α (Erased z ∷ rγ) = extScopeConcatBind α z rγ
 
     @0 extScopeConcat : (@0 α β : Scope name) (@0 rγ : RScope name) → (extScope (α <> β) rγ) ≡ α <> (extScope β rγ)
     extScopeConcat α [] rγ =
@@ -217,6 +223,17 @@ opaque
   {-# COMPILE AGDA2HS caseScope #-}
 
 opaque
+  unfolding RScope
+
+  caseRScope : (rα : RScope name)
+            → (@0 {{rα ≡ mempty}} → c)
+            → ((@0 x : name) (rβ : RScope name) → @0 {{rα ≡ x ◂ rβ}} → c)
+            → c
+  caseRScope [] emptyCase bindCase = emptyCase
+  caseRScope (Erased x ∷ β) emptyCase bindCase = bindCase x β
+  {-# COMPILE AGDA2HS caseRScope #-}
+
+opaque
   unfolding Scope
   rezzBind
     : {@0 α : Scope name} {@0 x : name}
@@ -229,6 +246,7 @@ opaque
   {-# COMPILE AGDA2HS rezzUnbind #-}
 
 opaque
-  unfolding Scope iLawfulMonoidScope RScope iLawfulMonoidRScope extScope extScopeConcatEmpty rezzExtScope caseScope rezzBind
+  unfolding Scope iLawfulMonoidScope RScope iLawfulMonoidRScope extScope extScopeConcatEmpty rezzExtScope caseScope caseRScope rezzBind
   ScopeCoreThings : Set₁
   ScopeCoreThings = Set
+ 

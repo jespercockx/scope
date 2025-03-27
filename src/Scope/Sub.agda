@@ -64,10 +64,9 @@ opaque
   subJoinDrop r < p > = < splitJoinRight r p >
   {-# COMPILE AGDA2HS subJoinDrop #-}
 
-  -- replaced by subExtScope below
-  -- subJoinHere : Rezz α₂ → α₁ ⊆ α₂ → α₁ ⊆ (α₂ <> β)
-  -- subJoinHere r < p > = < splitJoinRightr r p >
-  -- {-# COMPILE AGDA2HS subJoinHere #-}
+  subJoinHere : Rezz β → α₁ ⊆ β → α₁ ⊆ (α₂ <> β)
+  subJoinHere r < p > = < splitJoinRightr r p >
+  {-# COMPILE AGDA2HS subJoinHere #-}
 
 opaque
   unfolding Sub

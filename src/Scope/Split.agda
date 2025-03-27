@@ -151,21 +151,21 @@ opaque
     → α₁ ⋈ α₂ ≡ α
     → β₁ ⋈ β₂ ≡ β
     → (α₁ <> β₁) ⋈ (α₂ <> β₂) ≡ (α <> β)
-  splitJoin r q EmptyL      = splitJoinRight r q
-  splitJoin r q EmptyR      = splitJoinLeft  r q
-  splitJoin r q (ConsL x p) = ConsL x (splitJoin (rezzTail r) q p)
-  splitJoin r q (ConsR x p) = ConsR x (splitJoin (rezzTail r) q p)
+  splitJoin r p EmptyL      = splitJoinRight r p
+  splitJoin r p EmptyR      = splitJoinLeft  r p
+  splitJoin r p (ConsL x q) = ConsL x (splitJoin (rezzTail r) p q)
+  splitJoin r p (ConsR x q) = ConsR x (splitJoin (rezzTail r) p q)
   {-# COMPILE AGDA2HS splitJoin #-}
 
--- splitJoinLeftr : Rezz β → β₁ ⋈ β₂ ≡ β → (β₁ <> α) ⋈ β₂ ≡ (β <> α)
--- splitJoinLeftr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
---   subst (λ γ → (β₁ <> α) ⋈ γ ≡ (β <> α)) (rightIdentity _) (splitJoin r p splitEmptyRight)
--- {-# COMPILE AGDA2HS splitJoinLeftr #-}
+splitJoinLeftr : Rezz β → β₁ ⋈ β₂ ≡ β → (α <> β₁) ⋈ β₂ ≡ (α <> β)
+splitJoinLeftr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
+  subst (λ γ → (α <> β₁) ⋈ γ ≡ (α <> β)) (leftIdentity β₂) (splitJoin r splitEmptyRight p)
+{-# COMPILE AGDA2HS splitJoinLeftr #-}
 
--- splitJoinRightr : Rezz β → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (β₂ <> α) ≡ (β <> α)
--- splitJoinRightr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
---   subst (λ γ → γ ⋈ (β₂ <> α) ≡ (β <> α)) (rightIdentity _) (splitJoin r p splitEmptyLeft)
--- {-# COMPILE AGDA2HS splitJoinRightr #-}
+splitJoinRightr : Rezz β → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (α <> β₂) ≡ (α <> β)
+splitJoinRightr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
+  subst (λ γ → γ ⋈ (α <> β₂) ≡ (α <> β)) (leftIdentity β₁) (splitJoin r splitEmptyLeft p)
+{-# COMPILE AGDA2HS splitJoinRightr #-}
 
 opaque
   unfolding Split
