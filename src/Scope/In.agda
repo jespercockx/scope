@@ -122,6 +122,7 @@ opaque
 
 inScopeInExtScope : Rezz rβ → x ∈ α → x ∈ (extScope α rβ)
 inScopeInExtScope r = coerce (subExtScope r subRefl)
+{-# COMPILE AGDA2HS inScopeInExtScope inline #-}
 
 opaque
   unfolding Scope
