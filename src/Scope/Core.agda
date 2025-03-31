@@ -83,7 +83,7 @@ module DefScope where
   bind α x = α <> [ x ]
   {-# COMPILE AGDA2HS bind #-}
 
-  infixr 5 bind
+  infixl 5 bind
   syntax bind α x = α ▸ x
 
 {- end of module DefScope -}
@@ -112,7 +112,7 @@ module DefRScope where
     rsingleton x = Erased x ∷ []
     {-# COMPILE AGDA2HS rsingleton #-}
 
-    syntax rsingleton x = [ x ◂]
+    syntax rsingleton x = x ◂
 
     instance
       iSemigroupRScope : Semigroup (RScope name)
@@ -146,7 +146,7 @@ module DefRScope where
       iLawfulMonoidRScope = iLawfulMonoidList
 
   rbind : @0 name → RScope name → RScope name
-  rbind x α = [ x ◂] <> α
+  rbind x α = x ◂ <> α
   {-# COMPILE AGDA2HS rbind #-}
 
   infixr 5 rbind
