@@ -24,6 +24,7 @@ private variable
 opaque
   unfolding Scope
 
+  {- All p α is a proof that  ∀ (x ∈ α), p x -}
   All : (p : @0 name → Set) → @0 Scope name → Set
   All p = List.All λ x → p (get x)
   {-# COMPILE AGDA2HS All #-}
@@ -41,8 +42,8 @@ opaque
   {-# COMPILE AGDA2HS getAllSingl #-}
 
   allJoin : All p α → All p β → All p (α <> β)
-  allJoin List.ANil pbs = pbs
-  allJoin (List.ACons px pas) pbs = List.ACons px (allJoin pas pbs)
+  allJoin {p = p} pas List.ANil = pas
+  allJoin {p = p} pas (List.ACons px pbs) = List.ACons px (allJoin pas pbs)
   {-# COMPILE AGDA2HS allJoin #-}
 
 opaque
@@ -68,7 +69,7 @@ opaque
   unfolding All Sub Split lookupAll inHere splitRefl
 
   lookupHere : (l : All p α) (ph : p x)
-             → lookupAll (allJoin (allSingl ph) l) inHere ≡ ph
+             → lookupAll (allJoin l (allSingl ph)) inHere ≡ ph
   lookupHere _ _ = refl
 
 opaque
@@ -76,7 +77,7 @@ opaque
 
   lookupThere : {ph : p y} {pi : p x} {l : All p α} {i : x ∈ α}
               → lookupAll l i ≡ pi
-              → lookupAll (allJoin (allSingl ph) l) (inThere i) ≡ pi
+              → lookupAll (allJoin l (allSingl ph)) (inThere i) ≡ pi
   lookupThere p = p
 
 _!_ : {p : @0 name → Set} {@0 α : Scope name}
@@ -118,7 +119,7 @@ opaque
   allInScope (List.ACons {x = x} p als) (List.ACons q bls) = do
     rt ← allInScope als bls
     ifDec (decIn p q)
-      (λ where {{refl}} → Just (Erased (cong (λ t → bind (get x) t) (get rt))))
+      (λ where {{refl}} → Just (Erased (cong (λ t → t ▸ (get x)) (get rt))))
       Nothing
   {-# COMPILE AGDA2HS allInScope #-}
 

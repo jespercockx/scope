@@ -16,6 +16,7 @@ opaque
   Sub α β = Σ0 _ (λ γ → α ⋈ γ ≡ β)
   {-# COMPILE AGDA2HS Sub inline #-}
 
+  infixr 4 Sub
   syntax Sub α β = α ⊆ β
 
   subTrans : α ⊆ β → β ⊆ γ → α ⊆ γ
@@ -32,7 +33,7 @@ opaque
   subRight p = < splitComm p >
   {-# COMPILE AGDA2HS subRight #-}
 
-  subWeaken : α ⊆ β → α ⊆ (bind x β)
+  subWeaken : α ⊆ β → α ⊆ β ▸ x
   subWeaken < p > = < splitBindRight p >
   {-# COMPILE AGDA2HS subWeaken #-}
 
@@ -48,60 +49,65 @@ opaque
   rezzSub < p > = rezzSplitLeft p
   {-# COMPILE AGDA2HS rezzSub #-}
 
-  subJoin : Rezz α₂
+  subJoin : Rezz β₂
           → α₁ ⊆ α₂
           → β₁ ⊆ β₂
           → (α₁ <> β₁) ⊆ (α₂ <> β₂)
   subJoin r < p > < q > = < splitJoin r p q >
   {-# COMPILE AGDA2HS subJoin #-}
 
-  subJoinKeep : Rezz α → β₁ ⊆ β₂ → (α <> β₁) ⊆ (α <> β₂)
+  subJoinKeep : Rezz β → α₁ ⊆ α₂ → (α₁ <> β) ⊆ (α₂ <> β)
   subJoinKeep r < p > = < splitJoinLeft r p >
   {-# COMPILE AGDA2HS subJoinKeep #-}
 
-  subJoinDrop : Rezz α → β₁ ⊆ β₂ → β₁ ⊆ (α <> β₂)
+  subJoinDrop : Rezz β → α₁ ⊆ α₂ → α₁ ⊆ (α₂ <> β)
   subJoinDrop r < p > = < splitJoinRight r p >
   {-# COMPILE AGDA2HS subJoinDrop #-}
 
-  subJoinHere : Rezz α₂ → α₁ ⊆ α₂ → α₁ ⊆ (α₂ <> β)
+  subJoinHere : Rezz β → α₁ ⊆ β → α₁ ⊆ (α₂ <> β)
   subJoinHere r < p > = < splitJoinRightr r p >
   {-# COMPILE AGDA2HS subJoinHere #-}
 
 opaque
   unfolding Sub
 
-  subBindKeep : α ⊆ β → (bind y α) ⊆ (bind y β)
+  subBindKeep : α ⊆ β → α ▸ y ⊆ β ▸ y
   subBindKeep {y = y} = subJoinKeep (rezz (singleton y))
   {-# COMPILE AGDA2HS subBindKeep #-}
 
-  subBindDrop : α ⊆ β → α ⊆ (bind y β)
-  subBindDrop {y = y} = subJoinDrop (rezz (singleton y))
+  subBindDrop : α ⊆ β → α ⊆ β ▸ y
+  subBindDrop = subWeaken
   {-# COMPILE AGDA2HS subBindDrop #-}
-
-  subBindrKeep : Rezz β → α ⊆ β → (bindr α y) ⊆ (bindr β y)
-  subBindrKeep {y = y} r < p > = < splitBindrLeft r p >
-  {-# COMPILE AGDA2HS subBindrKeep #-}
-
-  subBindrDrop : Rezz β → α ⊆ β → α ⊆ (bindr β y)
-  subBindrDrop {y = y} r < p > = < splitBindrRight r p >
-  {-# COMPILE AGDA2HS subBindrDrop #-}
 
 opaque
   unfolding Sub
 
-  joinSubLeft : Rezz α₁ → (α₁ <> α₂) ⊆ β → α₁ ⊆ β
+  joinSubLeft : Rezz α₂ → (α₁ <> α₂) ⊆ β → α₁ ⊆ β
   joinSubLeft r < p > =
     let < q , _ > = splitAssoc (splitRefl r) p
     in  < q >
   {-# COMPILE AGDA2HS joinSubLeft #-}
 
-  joinSubRight : Rezz α₁ → (α₁ <> α₂) ⊆ β → α₂ ⊆ β
+  joinSubRight : Rezz α₂ → (α₁ <> α₂) ⊆ β → α₂ ⊆ β
   joinSubRight r < p > =
     let < q , _ > = splitAssoc (splitComm (splitRefl r)) p
     in  < q >
   {-# COMPILE AGDA2HS joinSubRight #-}
 
 opaque
-  unfolding Sub subBindKeep joinSubLeft
+  unfolding RScope Sub Split extScope
+  subExtScopeKeep : {@0 rγ : RScope name} → Rezz rγ → α ⊆ β → (extScope α rγ) ⊆ (extScope β rγ)
+  subExtScopeKeep (rezz []) s = s
+  subExtScopeKeep (rezz (Erased x ∷ rγ)) (⟨ δ ⟩ s) = subExtScopeKeep (rezz rγ) (⟨ δ ⟩ (ConsL x s))
+  {-# COMPILE AGDA2HS subExtScopeKeep #-}
+
+
+  subExtScope : {@0 rγ : RScope name} → Rezz rγ → α ⊆ β → α ⊆ (extScope β rγ)
+  subExtScope (rezz []) s = s
+  subExtScope (rezz (Erased x ∷ rγ)) (⟨ δ ⟩ s) = subExtScope (rezz rγ) (⟨ δ ▸ x ⟩ (ConsR x s))
+  {-# COMPILE AGDA2HS subExtScope #-}
+
+opaque
+  unfolding Sub subBindKeep joinSubLeft subExtScope
   SubThings : Set₁
   SubThings = Set

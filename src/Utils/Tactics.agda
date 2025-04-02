@@ -5,7 +5,7 @@ open import Haskell.Prelude hiding (_>>_; _>>=_)
 import Agda.Builtin.String as BuiltinString
 open import Agda.Builtin.Reflection public using ( Term ; TC )
 open Agda.Builtin.Reflection renaming ( returnTC to return ; bindTC to _>>=_ )
-  
+
 private
   _>>_ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → TC A → TC B → TC B
   m >> n = m >>= λ _ → n
