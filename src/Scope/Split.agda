@@ -178,14 +178,6 @@ opaque
   splitBindRight {x = x} = splitJoinRight (rezz [ x ])
   {-# COMPILE AGDA2HS splitBindRight #-}
 
-  -- splitBindrLeft : Rezz γ → α ⋈ β ≡ γ → (bindr α x) ⋈ β ≡ (bindr γ x)
-  -- splitBindrLeft {x = x} r p = splitJoinLeftr r p
-  -- {-# COMPILE AGDA2HS splitBindrLeft inline #-}
-
-  -- splitBindrRight : Rezz γ → α ⋈ β ≡ γ → α ⋈ (bindr β x) ≡ (bindr γ x)
-  -- splitBindrRight {x = x} = splitJoinRightr
-  -- {-# COMPILE AGDA2HS splitBindrRight inline #-}
-
 {-
 The following statement is FALSE:
   ⋈-unique-left : α₁ ⋈ β ≡ γ → α₂ ⋈ β ≡ γ → α₁ ≡ α₂

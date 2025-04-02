@@ -68,9 +68,6 @@ opaque
     rev'Involution (x ∷ s)
       = trans (rev'Dist (rev' s) (x ∷ [])) (cong (λ a → x ∷ a) (rev'Involution s))
 
-    -- rev'BindComp : (s : Scope name) → (@0 x : name) → rev' (x ◃ s) ≡ (rev' s) ▹ x
-    -- rev'BindComp s x = refl
-
   revsIdentity : revScope {name = name} mempty ≡ mempty
   revsIdentity = refl
 
@@ -85,12 +82,6 @@ opaque
     rewrite revsrev' s
     rewrite revsrev' (rev' s)
     = rev'Involution s
-
-  -- revsBindComp : (s : Scope name) → (@0 x : name) → ~ (x ◃ s) ≡ ~ s ▹ x
-  -- revsBindComp s x
-  --   rewrite revsrev' (x ◃ s)
-  --   rewrite revsrev' s
-  --   = rev'BindComp s x
 
 opaque
   unfolding revScope revScopeAccComp

@@ -116,10 +116,6 @@ opaque
   inBindCase {α = α} {y = y} p g f = inJoinCase (rezz ([ y ])) p g ((λ q → (inSingCase q f)))
   {-# COMPILE AGDA2HS inBindCase #-}
 
-  -- inBindrCase : Rezz α → x ∈ (α ▹ y) → (x ∈ α → a) → (@0 x ≡ y → a) → a
-  -- inBindrCase r p f g = inJoinCase r p f (λ q → inSingCase q g)
-  -- {-# COMPILE AGDA2HS inBindrCase #-}
-
 inScopeInExtScope : Rezz rβ → x ∈ α → x ∈ (extScope α rβ)
 inScopeInExtScope r = coerce (subExtScope r subRefl)
 {-# COMPILE AGDA2HS inScopeInExtScope inline #-}
