@@ -89,13 +89,6 @@ module DefScope where
 {- end of module DefScope -}
 open DefScope public
 
--- bindr : Scope name → @0 name → Scope name
--- bindr α x = α <> [ x ]
--- {-# COMPILE AGDA2HS bindr #-}
-
--- infixr 5 bindr
--- syntax bindr α x = α ▹ x
-
 ---------------------------------------------------------------------------------------------------
                                     {- PART TWO : RScope -}
 ---------------------------------------------------------------------------------------------------
@@ -249,4 +242,3 @@ opaque
   unfolding Scope iLawfulMonoidScope RScope iLawfulMonoidRScope extScope extScopeConcatEmpty rezzExtScope caseScope caseRScope rezzBind
   ScopeCoreThings : Set₁
   ScopeCoreThings = Set
- 
