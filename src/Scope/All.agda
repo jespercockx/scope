@@ -57,7 +57,7 @@ opaque
 
   allEmptyR : AllR p mempty
   allEmptyR = List.ANil
-  {-# COMPILE AGDA2HS allEmpty #-}
+  {-# COMPILE AGDA2HS allEmptyR #-}
 
   allSinglR : p x → AllR p (x ◂)
   allSinglR p = List.ACons p List.ANil
