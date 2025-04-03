@@ -18,6 +18,7 @@ open import Scope.Split
 private variable
   @0 name : Set
   @0 α β  : Scope name
+  @0 rα rβ  : RScope name
   @0 x y  : name
   p q     : @0 name → Set
 
@@ -45,6 +46,31 @@ opaque
   allJoin {p = p} pas List.ANil = pas
   allJoin {p = p} pas (List.ACons px pbs) = List.ACons px (allJoin pas pbs)
   {-# COMPILE AGDA2HS allJoin #-}
+
+opaque
+  unfolding RScope
+
+  {- All p α is a proof that  ∀ (x ∈ rα), p x -}
+  AllR : (p : @0 name → Set) → @0 RScope name → Set
+  AllR p = List.All λ x → p (get x)
+  {-# COMPILE AGDA2HS AllR #-}
+
+  allEmptyR : AllR p mempty
+  allEmptyR = List.ANil
+  {-# COMPILE AGDA2HS allEmpty #-}
+
+  allSinglR : p x → AllR p (x ◂)
+  allSinglR p = List.ACons p List.ANil
+  {-# COMPILE AGDA2HS allSinglR #-}
+
+  getAllSinglR : AllR p (x ◂) → p x
+  getAllSinglR (List.ACons p List.ANil) = p
+  {-# COMPILE AGDA2HS getAllSinglR #-}
+
+  allJoinR : AllR p rα → AllR p rβ → AllR p (rβ <> rα)
+  allJoinR {p = p} pas List.ANil = pas
+  allJoinR {p = p} pas (List.ACons px pbs) = List.ACons px (allJoinR pas pbs)
+  {-# COMPILE AGDA2HS allJoinR #-}
 
 opaque
   unfolding All
