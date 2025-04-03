@@ -92,6 +92,25 @@ opaque
   {-# COMPILE AGDA2HS findAll #-}
 
 opaque
+  unfolding AllR
+
+  lookupAllR : AllR p rα → rα ∋ x → p x
+  lookupAllR (List.ACons pz pzs) (Zero  ⟨ IsZeroR  refl ⟩) = pz
+  lookupAllR (List.ACons _ pzs) (Suc n ⟨ IsSucR pn ⟩) = lookupAllR pzs (n ⟨ pn ⟩)
+  {-# COMPILE AGDA2HS lookupAllR #-}
+
+  findAllR : {q : Set}
+          → AllR p rα
+          → ({@0 el : name} → (pel : p el) → (ela : rα ∋ el) → Maybe q)
+          → Maybe q
+  findAllR List.ANil qc = Nothing
+  findAllR (List.ACons px al) qc =
+    case qc px (inRHere) of λ where
+      (Just qt) → Just qt
+      Nothing → findAllR al (λ pel i → qc pel (inRThere i))
+  {-# COMPILE AGDA2HS findAllR #-}
+
+opaque
   unfolding All Sub Split lookupAll inHere splitRefl
 
   lookupHere : (l : All p α) (ph : p x)
@@ -150,6 +169,43 @@ opaque
   {-# COMPILE AGDA2HS allInScope #-}
 
 opaque
+  unfolding AllR
+
+  mapAllR : (f : ∀ {@0 x} → p x → q x) → AllR p rα → AllR q rα
+  mapAllR f List.ANil = List.ANil
+  mapAllR f (List.ACons p ps) = List.ACons (f p) (mapAllR f ps)
+  {-# COMPILE AGDA2HS mapAllR #-}
+
+  tabulateAllR : Rezz rα → (f : ∀ {@0 x} → (rα ∋ x) → p x) → AllR p rα
+  tabulateAllR (rezz []) f = List.ANil
+  tabulateAllR (rezz (x ∷ α)) f = List.ACons (f inRHere) (tabulateAllR (rezz-id) (f ∘ inRThere))
+  {-# COMPILE AGDA2HS tabulateAllR #-}
+
+  allInR : AllR p rα → AllR (λ el → p el × rα ∋ el) rα
+  allInR List.ANil = List.ANil
+  allInR (List.ACons x al) = List.ACons (x , inRHere) (mapAllR (second inRThere) (allInR al))
+  {-# COMPILE AGDA2HS allInR #-}
+
+  rezzAllR : AllR p rα → Rezz rα
+  rezzAllR List.ANil = rezz []
+  rezzAllR (List.ACons {x = x} _ xs) = rezzCong2 (_∷_) rezzErase (rezzAllR xs)
+  {-# COMPILE AGDA2HS rezzAllR #-}
+
+  allInRScope : ∀ {@0 γ}
+               (als : AllR (λ c → c ∈ γ) rα)
+               (bls : AllR (λ c → c ∈ γ) rβ)
+             → Maybe (Erase (rα ≡ rβ))
+  allInRScope List.ANil                  List.ANil = Just (Erased refl)
+  allInRScope List.ANil                  (List.ACons _ _) = Nothing
+  allInRScope (List.ACons         _ _)   List.ANil = Nothing
+  allInRScope (List.ACons {x = x} p als) (List.ACons q bls) = do
+    rt ← allInRScope als bls
+    ifDec (decIn p q)
+      (λ where {{refl}} → Just (Erased (cong (λ t → (get x) ◂ t) (get rt))))
+      Nothing
+  {-# COMPILE AGDA2HS allInRScope #-}
+
+opaque
   unfolding All lookupAll
 
   allLookup : (ls : All p α)
@@ -165,6 +221,7 @@ opaque
 opaque
   unfolding All findAll lookupAll lookupHere lookupThere
   unfolding mapAll tabulateAll allIn rezzAll allInScope allLookup
+  unfolding AllR mapAllR
 
   AllThings : Set₁
   AllThings = Set

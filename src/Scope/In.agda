@@ -17,7 +17,7 @@ private variable
   @0 name : Set
   @0 x y : name
   @0 α β γ : Scope name
-  @0 rβ : RScope name
+  @0 rα rβ : RScope name
 
 data Index : Set where
   Zero : Index
@@ -35,6 +35,17 @@ In x α = ∃ Index (λ n → IsNth x α n)
 
 infix 6 In
 syntax In x α = x ∈ α
+
+data IsNthR (@0 x : name) : @0 RScope name → Index → Set where
+  IsZeroR : x ≡ y → IsNthR x (y ◂ rα) Zero
+  IsSucR : {n : Index} → IsNthR x rα n → IsNthR x (y ◂ rα) (Suc n)
+
+InR : @0 name → @0 RScope name → Set
+InR x rα = ∃ Index (λ n → IsNthR x rα n)
+{-# COMPILE AGDA2HS InR inline #-}
+
+infix 6 InR
+syntax InR x rα = rα ∋ x
 
 inToSub : x ∈ α → [ x ] ⊆ α
 inToSub {x = x} (Zero ⟨ IsZero refl ⟩) = subRight (splitRefl (rezz [ x ]))
@@ -77,6 +88,16 @@ opaque
   bindSubToIn : (α ▸ x) ⊆ β → x ∈ β
   bindSubToIn s = coerce s inHere
   {-# COMPILE AGDA2HS bindSubToIn #-}
+
+opaque
+
+  inRHere : (x ◂ rα) ∋ x
+  inRHere = Zero ⟨ IsZeroR refl ⟩
+  {-# COMPILE AGDA2HS inRHere #-}
+
+  inRThere : rα ∋ x → (y ◂ rα) ∋ x
+  inRThere (n ⟨ p ⟩) = Suc n ⟨ IsSucR p ⟩
+  {-# COMPILE AGDA2HS inRThere #-}
 
 opaque
   unfolding Split
