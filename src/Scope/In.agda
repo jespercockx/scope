@@ -161,6 +161,24 @@ opaque
   {-# COMPILE AGDA2HS decIn #-}
 
 opaque
-  unfolding subToIn coerce inHere inEmptyCase inJoinCase inBindCase decIn
+  unfolding RScope
+  decInR
+    : {@0 x y : name} (p : rα ∋ x) (q : rα ∋ y)
+    → Dec (_≡_ {A = Σ0 name (λ n → rα ∋ n)} (⟨ x ⟩ p) (⟨ y ⟩ q))
+  decInR (Zero ⟨ IsZeroR refl ⟩) (Zero ⟨ IsZeroR refl ⟩) = True ⟨ refl ⟩
+  decInR (Zero ⟨ _ ⟩) (Suc m ⟨ _ ⟩) = False ⟨ (λ ()) ⟩
+  decInR (Suc n ⟨ _ ⟩) (Zero ⟨ _ ⟩) = False ⟨ (λ ()) ⟩
+  decInR (Suc n ⟨ IsSucR p ⟩) (Suc m ⟨ IsSucR q ⟩) = mapDec aux (λ where refl → refl) (decInR (n ⟨ p ⟩) (m ⟨ q ⟩))
+    where
+      @0 aux : ∀ {@0 x y z γ n m} {p : IsNthR x γ n} {q : IsNthR y γ m} →
+            _≡_ {A = Σ0 name (λ w → γ ∋ w)} (⟨ x ⟩ n ⟨ p ⟩) (⟨ y ⟩ m ⟨ q ⟩) →
+            _≡_ {A = Σ0 name (λ w → (Erased z ∷ γ) ∋ w)}
+                (⟨ x ⟩ Suc n ⟨ IsSucR p ⟩)
+                (⟨ y ⟩ Suc m ⟨ IsSucR q ⟩)
+      aux refl = refl
+  {-# COMPILE AGDA2HS decInR #-}
+
+opaque
+  unfolding subToIn coerce inHere inEmptyCase inJoinCase inBindCase decIn inRHere decInR
   InThings : Set₁
   InThings = Set
