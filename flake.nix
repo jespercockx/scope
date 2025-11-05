@@ -13,7 +13,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {inherit system;};
-        agda2hs-lib = agda2hs.packages.${system}.agda2hs-lib;
+        agda2hs-lib = agda2hs.packages.${system}.base-lib;
         agda2hsWithPackages = agda2hs.lib.${system}.withPackages;
         agda2hs-custom = agda2hsWithPackages [agda2hs-lib];
         scope-lib = pkgs.agdaPackages.mkDerivation
