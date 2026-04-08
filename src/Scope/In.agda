@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Scope.In where
 
 open import Haskell.Prelude hiding (coerce)
@@ -137,6 +138,11 @@ opaque
   inBindCase {α = α} {y = y} p g f = inJoinCase (sing ([ y ])) p g ((λ q → (inSingCase q f)))
   {-# COMPILE AGDA2HS inBindCase #-}
 
+opaque
+  inRbindCase : (y ◂ rα) ∋ x → (rα ∋ x → a) → (@0 x ≡ y → a) → a
+  inRbindCase p g f = {!!}
+  {-# COMPILE AGDA2HS inRbindCase #-}
+
 inScopeInExtScope : Singleton rβ → x ∈ α → x ∈ (extScope α rβ)
 inScopeInExtScope r = coerce (subExtScope r subRefl)
 {-# COMPILE AGDA2HS inScopeInExtScope inline #-}
@@ -162,6 +168,15 @@ opaque
 
 opaque
   unfolding RScope
+
+  @0 inRemptyToBot : mempty ∋ x → ⊥
+  inRemptyToBot ()
+
+  inRemptyCase : (mempty ∋ x) → a
+  inRemptyCase p = error {i = inRemptyToBot p} "impossible"
+  {-# COMPILE AGDA2HS inRemptyCase #-}
+
+
   decInR
     : {@0 x y : name} (p : rα ∋ x) (q : rα ∋ y)
     → Dec (_≡_ {A = Σ0 name (λ n → rα ∋ n)} (⟨ x ⟩ p) (⟨ y ⟩ q))
