@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 module Scope.In where
 
 open import Haskell.Prelude hiding (coerce)
@@ -127,6 +126,31 @@ opaque
   {-# COMPILE AGDA2HS inSplitCase #-}
 
 opaque
+  unfolding RSplit
+  @0 inRemptyToBot : mempty ∋ x → ⊥
+  inRemptyToBot ()
+
+  inRemptyCase : (mempty ∋ x) → a
+  inRemptyCase p = error {i = inRemptyToBot p} "impossible"
+  {-# COMPILE AGDA2HS inRemptyCase #-}
+
+  inRSingCase : ( rsingleton y ) ∋ x → (@0 x ≡ y → a) → a
+  inRSingCase (Zero ⟨ IsZeroR refl ⟩) f = f refl
+  inRSingCase (Suc n ⟨ IsSucR () ⟩) f
+  {-# COMPILE AGDA2HS inRSingCase #-}
+
+  inRSplitCase : {@0 α β γ : RScope name} → RSplit α β γ → γ ∋ x → (α ∋ x → a) → (β ∋ x → a) → a
+  inRSplitCase EmptyL (Zero ⟨ IsZeroR refl ⟩) f g = g inRHere
+  inRSplitCase EmptyL (Suc n ⟨ IsSucR p ⟩) f g = g (inRThere (n ⟨ p ⟩))
+  inRSplitCase EmptyR (Zero ⟨ IsZeroR refl ⟩) f g = f inRHere
+  inRSplitCase EmptyR (Suc n ⟨ IsSucR p ⟩) f g = f (inRThere (n ⟨ p ⟩))
+  inRSplitCase (ConsL x s) (Zero ⟨ IsZeroR refl ⟩) f g = f inRHere
+  inRSplitCase (ConsL x s) (Suc n ⟨ IsSucR p ⟩) f g = inRSplitCase s (n ⟨ p ⟩) (f ∘ inRThere) g
+  inRSplitCase (ConsR y s) (Zero ⟨ IsZeroR refl ⟩) f g = g inRHere
+  inRSplitCase (ConsR y s) (Suc n ⟨ IsSucR p ⟩) f g = inRSplitCase s (n ⟨ p ⟩) f (g ∘ inRThere)
+  {-# COMPILE AGDA2HS inRSplitCase #-}
+
+opaque
   inJoinCase
     : Singleton β
     → x ∈ (α <> β) → (x ∈ α → a) → (x ∈ β → a) → a
@@ -134,13 +158,32 @@ opaque
   {-# COMPILE AGDA2HS inJoinCase #-}
 
 opaque
+  inRJoinCase
+    : Singleton rα
+    → (rα <> rβ) ∋ x → (rα ∋ x → a) → (rβ ∋ x → a) → a
+  inRJoinCase r = inRSplitCase (splitRrefl r)
+  {-# COMPILE AGDA2HS inRJoinCase #-}
+
+opaque
   inBindCase : x ∈ (α ▸ y) → (x ∈ α → a) → (@0 x ≡ y → a) → a
-  inBindCase {α = α} {y = y} p g f = inJoinCase (sing ([ y ])) p g ((λ q → (inSingCase q f)))
+  inBindCase {α = α} {y = y} p g f = inJoinCase (sing ([ y ])) p g (λ q → (inSingCase q f))
   {-# COMPILE AGDA2HS inBindCase #-}
+
+-- conv1' : (rα ∋ x) → x ∈ (extScope mempty rα)
+-- conv1' {rα = rα} {x = x} (Zero ⟨ IsZeroR refl ⟩)
+--   rewrite (extScopeBind {α = mempty})
+--   = Zero ⟨ IsZero refl ⟩
+
+-- opaque
+--   conv1 : (y ◂ rα) ∋ x → x ∈ ((extScope mempty rα) ▸ y)
+--   conv1 p = conv1' {!!}
+
+--   conv2 : (rα ∋ x → a) → (x ∈ ((extScope mempty rα)) → a)
+--   conv2 p q = {!!}
 
 opaque
   inRbindCase : (y ◂ rα) ∋ x → (rα ∋ x → a) → (@0 x ≡ y → a) → a
-  inRbindCase p g f = {!!}
+  inRbindCase {y = y} {rα = rα} p g f = inRJoinCase (sing (y ◂ )) p (λ q → inRSingCase q f) g 
   {-# COMPILE AGDA2HS inRbindCase #-}
 
 inScopeInExtScope : Singleton rβ → x ∈ α → x ∈ (extScope α rβ)
@@ -168,14 +211,6 @@ opaque
 
 opaque
   unfolding RScope
-
-  @0 inRemptyToBot : mempty ∋ x → ⊥
-  inRemptyToBot ()
-
-  inRemptyCase : (mempty ∋ x) → a
-  inRemptyCase p = error {i = inRemptyToBot p} "impossible"
-  {-# COMPILE AGDA2HS inRemptyCase #-}
-
 
   decInR
     : {@0 x y : name} (p : rα ∋ x) (q : rα ∋ y)

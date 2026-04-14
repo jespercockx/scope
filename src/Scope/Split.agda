@@ -44,6 +44,13 @@ opaque
   syntax Split α β γ = α ⋈ β ≡ γ
 
 opaque
+  unfolding RScope
+
+  RSplit : (@0 α β γ : RScope name) → Set
+  RSplit = ListSplit
+  {-# COMPILE AGDA2HS RSplit inline #-}
+
+opaque
   unfolding Split
 
   splitEmptyLeft : mempty ⋈ β ≡ β
@@ -166,6 +173,20 @@ splitJoinRightr : Singleton β → β₁ ⋈ β₂ ≡ β → β₁ ⋈ (α <> �
 splitJoinRightr {β = β} {β₁ = β₁} {β₂ = β₂} {α = α} r p =
   subst (λ γ → γ ⋈ (α <> β₂) ≡ (α <> β)) (leftIdentity β₁) (splitJoin r splitEmptyLeft p)
 {-# COMPILE AGDA2HS splitJoinRightr #-}
+
+
+
+opaque
+  unfolding RSplit
+
+  splitRemptyLeft : {@0 rβ : RScope name} → RSplit mempty rβ rβ
+  splitRemptyLeft = EmptyL
+  {-# COMPILE AGDA2HS splitRemptyLeft #-}
+
+  splitRrefl : {@0 rα rβ : RScope name} → Singleton rα → RSplit rα rβ (rα <> rβ)
+  splitRrefl (sing []) = splitRemptyLeft
+  splitRrefl (sing (Erased x ∷ α)) = ConsL x (splitRrefl (sing α))
+  {-# COMPILE AGDA2HS splitRrefl #-}
 
 opaque
   unfolding Split
