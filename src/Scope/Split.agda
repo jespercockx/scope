@@ -236,6 +236,6 @@ opaque
   ∅-⋈-injective (ConsR x p) rewrite ∅-⋈-injective p = refl
 
 opaque
-  unfolding Split splitRefl singSplit splitJoin splitBindLeft decSplit
+  unfolding Split splitRefl splitRrefl singSplit splitJoin splitBindLeft decSplit
   SplitThings : Set₁
   SplitThings = Set
