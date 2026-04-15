@@ -169,21 +169,9 @@ opaque
   inBindCase {α = α} {y = y} p g f = inJoinCase (sing ([ y ])) p g (λ q → (inSingCase q f))
   {-# COMPILE AGDA2HS inBindCase #-}
 
--- conv1' : (rα ∋ x) → x ∈ (extScope mempty rα)
--- conv1' {rα = rα} {x = x} (Zero ⟨ IsZeroR refl ⟩)
---   rewrite (extScopeBind {α = mempty})
---   = Zero ⟨ IsZero refl ⟩
-
--- opaque
---   conv1 : (y ◂ rα) ∋ x → x ∈ ((extScope mempty rα) ▸ y)
---   conv1 p = conv1' {!!}
-
---   conv2 : (rα ∋ x → a) → (x ∈ ((extScope mempty rα)) → a)
---   conv2 p q = {!!}
-
 opaque
-  inRbindCase : (y ◂ rα) ∋ x → (rα ∋ x → a) → (@0 x ≡ y → a) → a
-  inRbindCase {y = y} {rα = rα} p g f = inRJoinCase (sing (y ◂ )) p (λ q → inRSingCase q f) g 
+  inRbindCase : (y ◂ rβ) ∋ x → (rβ ∋ x → a) → (@0 x ≡ y → a) → a
+  inRbindCase {y = y} {rβ = rβ} p g f = inRJoinCase (sing (y ◂ )) p (λ q → inRSingCase q f) g
   {-# COMPILE AGDA2HS inRbindCase #-}
 
 inScopeInExtScope : Singleton rβ → x ∈ α → x ∈ (extScope α rβ)
@@ -229,6 +217,6 @@ opaque
   {-# COMPILE AGDA2HS decInR #-}
 
 opaque
-  unfolding subToIn coerce inHere inEmptyCase inJoinCase inBindCase decIn inRHere decInR
+  unfolding subToIn coerce inHere inEmptyCase inJoinCase inBindCase decIn inRHere inRemptyCase inRJoinCase inRbindCase decInR
   InThings : Set₁
   InThings = Set
