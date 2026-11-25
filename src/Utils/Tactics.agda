@@ -39,7 +39,8 @@ auto hole = do
       let trySolution v = do
             debugPrint "auto" 10 (strErr "auto trying " ∷ termErr v ∷ [])
             unify hole v
-      let debugSolutions vs = do
+      let debugSolutions : List Term → TC ⊤
+          debugSolutions vs = do
             `vs ← quoteTC vs
             debugPrint "auto" 10 (strErr "auto trying list " ∷ termErr `vs ∷ [])
       ctx ← getContext
