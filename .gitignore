@@ -8,6 +8,8 @@ MAlonzo
 *.agda#
 .#*.agda
 *~
+.stack-work
+stack.yaml.lock
 lib
 dist-newstyle
 src/**/*.hs
